@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 inst/tutorials/*/*.html
+inst/tutorials/*/*/*.html

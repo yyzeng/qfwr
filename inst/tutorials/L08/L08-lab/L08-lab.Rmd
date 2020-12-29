@@ -1,0 +1,28 @@
+---
+title: "L08 上机练习"
+author: "***"
+date: "2020/12/**"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE  # 在最后 Knit 本文档前，记得将 eval 更改为 TRUE
+)
+```
+
+
+本次编程实操练习的目的在于综合运用课程学过的知识，特别是第八讲中讲述的 `tidyquant`、`tsibble` 和 `slider` 包：
+
+1. 利用 `tidyquant` 内置的数据集 `FANG` 生成基于股价移动均线的算法交易策略；
+2. 计算交易策略的绩效；
+3. 对移动窗口的大小进行优化。
+
+
+**to be prepared ...**
+
+
+### 恭喜同学们，完成第八讲课后练习啦！~~
+
+###          &#x1F942; []\~(￣▽￣)\~*  &#x1F942;
