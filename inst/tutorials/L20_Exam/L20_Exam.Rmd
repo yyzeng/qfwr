@@ -1,0 +1,271 @@
+---
+title: "L20 期末随堂小测"
+author: "曾永艺"
+date: "2020年12月31日"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: "tibble"
+description: >
+  这是厦门大学管理学院财务学系 **“量化金融与金融编程”** 
+  课程 _“期末随堂小测试卷”_。
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(testwhat)
+library(tidyverse)
+library(lubridate)
+library(tidyquant)
+library(tsibble)
+library(slider)
+library(tidymodels)
+options(tibble.print_max = 6, tibble.print_min = 4)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  out.width='70%', fig.align='center'
+)
+tutorial_options(exercise.timelimit = 60, 
+                 exercise.checker = testwhat_learnr)
+
+```
+
+
+## `r emo::ji("book")` 不定项选择题
+
+> 每题2分，多选1个选项扣1分，少选1个选项扣0.5分，⚖️
+
+#### 已帮同学们载入相关的 R 包，同学们在完成以下不定项选择题的过程中若有疑惑不妨先在以下代码练习窗口中完成交互式探索。
+
+  ```{r, eval=FALSE, echo=TRUE}
+  library(tidyverse)
+  library(lubridate)
+  library(tidyquant)
+  library(tsibble)
+  library(slider)
+  library(tidymodels)
+  ```
+
+```{r ex0, exercise=TRUE, exercise.lines=6}
+
+
+```
+
+
+```{r quiz}
+quiz(
+  question("1 以下说法正确的有：",
+    answer("`ggplot2` 基于 `grid` 绘图系统。", 
+           correct = TRUE),
+    answer("`ggplot2` 实现分层的图形语法，将数据映射为几何对象的图形属性。",
+           correct = TRUE),
+    answer("在 `ggplot2` 的图形语法看来，条形图和鸡冠花图的主要差异在于坐标系的不同。", 
+           correct = TRUE),
+    answer("借助于 `ggplot2` 的扩展包 `esquisse`，我们能便捷地将多个 `ggplot` 图表组合成一个图表。", correct = FALSE, 
+           message = "是 `patchwork` 包啦！<br>"),
+    answer("`plotly::ggplotly(p)` 会将 `ggplot` 图形对象 `p` 直接转变为交互式图表，十分便捷。",  correct = TRUE),
+    correct = "正确！", 
+    try_again = "错误！请重试。",
+    allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("2 以下说法正确的有：",
+    answer("围绕 RStudio 公司的 `rmarkdown` 和 `shiny` 形成了 R 环境下相对完备的数据科学发布环境。", 
+           correct = TRUE),
+    answer("R Markdown 文档使用 YAML 文件头来控制文档的输出细节。", 
+           correct = TRUE),
+    answer("在 R Markdown 文档中可直接使用易读的 markdown 语法，如 `*word*` 表示将 word 加粗。",  correct = FALSE, 
+           message = "`*word*` 表示变斜体，加粗要用 `**word**` 或 `__word__`。"),
+    answer("R Markdown 文档超越纯 markdown 文档的地方在于你可以在文档中插入可运行的 R 代码。<br>", 
+           correct = TRUE, 
+           message = "这可能就是 RMarkdown 以 R 打头的原因吧——当然，在 RMarkdown 文档中还可以插入基于其他引擎的代码块，如 python！<br>"),
+    answer("`shiny` app 用户界面 UI 的正确显示 / 更新需要运行 R 的计算机（服务端）的实时支持。", 
+           correct = TRUE),
+    correct = "Bingo！", 
+    try_again = "错误！请重新。",
+    post_message = "`rmarkdown` 和 `shiny` 生态值得你拥有！相信我！",
+    allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("3 以下关于 `dplyr` 包说法正确的有：",
+    answer('`filter()`、`slice()`、`arrange()` 的作用对象是数据集的列（变量）。',
+           correct = TRUE),
+    answer('`select()` 只能用于选取变量，变量重命名和调整次序应使用 `rename()` 和 `relocate()`。', correct = FALSE, 
+           message = "`select()` 是个多面手 &#x1F64C;，在完成选取变量的**同时**可重命名变量和调整变量次序，而不一定要依赖于更专用的 `rename()` 和 `relocate()`。<br>"),
+    answer('`summarise()` 生成新的数据框，每个汇总统计量占用一列，可和 `group_by()` 一起使用对数据集进行分组汇总计算。', 
+           correct = TRUE),
+    answer('`mutate(df, across(.cols, .fns, ...))` 对 `.cols` 指定的多列执行 `.fns` 操作。', 
+           correct = TRUE),
+    answer('`dplyr` 能通过接口包（如 `dbplyr` 和 `dtplyr`）以相同的函数接口操作其他常见的数据库（如 SQLite）或 R 数据结构（如  `data.table`）。', 
+           correct = TRUE),
+    correct = "选对啦！",
+    try_again = "错误！请重试。",
+    post_message = "`dplyr` 是 tidyverse 的核心包，它将常见的数据操作简化为寥寥几个清晰命名的函数，如`select()`、`filter()`等。",
+    allow_retry = TRUE, 
+    submit_button = "提交答案", 
+    try_again_button = "重新回答"
+  ),
+  
+  question("4 以下关于数据导入和数据齐整说法正确的有：",
+    answer('`tibble` 对象是 `data.frame` 的一种变体，是支撑 `tidyverse` 的核心数据类型。', 
+           correct = TRUE),
+    answer('齐整数据须满足的三个条件为每个观测自行成行、每个变量自行成列、每个取值自处一格。', 
+           correct = TRUE),
+    answer('运行 `read_csv("a;b;c\\n1;2;3\\n4;5", delim = ";")` 会出现解析失败的警告。', correct = FALSE, 
+           message = '事实上是未知参数的报错，`unused argument (delim = ";")`。<br>'),
+    answer('`pivot_longer()` 和 `pivot_wider()` 分别是 `gather()` 和 `spread()` 的升级版。', correct = TRUE, 
+           message = "确实挺难记清楚 `gather()` 和 `spread()` 究竟谁才是长变宽的 &#x1F630;，而 `pivot_longer()` 和 `pivot_wider()` 则清楚多了，且通过引入新参数让函数功能变得更加强大 &#x1F4AA;！<br>"),
+    answer('`separate()`（`extract()`）可将一列数据根据分割符（正则表达式）拆解为多列数据。', correct = TRUE),
+    correct = "答对啦，赞！&#x1F44F;",
+    try_again = "错误，请重试！",
+    allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("5 以下关于向量和函数说法正确的有：",
+    answer("当用 `c()` 函数连接不同类型数据的向量时，R 会自动套用最复杂的类型。", 
+           correct = TRUE),
+    answer("列表和原子向量的最大区别在于列表可同时包含多种类型的元素。", 
+           correct = TRUE),
+    answer("`lm(hwy ~ displ, data = mpg)` 返回对象的类为 `lm`，底层的数据结构则为含有多个元素的列表，我们可用列表提取元素运算符 `[[` 和 `$` 来提取相应的信息。", correct = TRUE, 
+           message = "友情提示：<br>`lm(hwy ~ displ, data = mpg) %>% class()` <br> `lm(hwy ~ displ, data = mpg) %>% typeof()` <br>"),
+    answer("使用函数有助于重用代码、避免无心之误，并让代码更易理解。", 
+           correct = TRUE),
+    answer("函数的参数大致可划分为两类：① 提供函数操作的对象、② 控制函数操作对象的具体细节。", 
+           correct = TRUE),
+    correct = "答对啦！",
+    incorrect = "错误，请重试。",
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("6 以下关于 `for` 循环、`purrr` 包和列表列说法正确的有：",
+    answer("`for` 循环通常由三部分组成：① 设置输出、② 循环序列、③ 循环体。", 
+           correct = TRUE),
+    answer("用函数式编程的方式来替代 `for` 循环，往往更加简洁，并支持用 `%>%` 渐进式地解决问题。", 
+           correct = TRUE),
+    answer("`purrr` 包中的 `map` 族函数大多以向量作为第1个参数，以函数作为第2个参数（支持快捷写法），并返回与输入向量等长的向量作为结果，相比 R 基础包中的 `apply` 族函数更易学易用。", 
+           correct = TRUE),
+    answer("`tibble` 对象支持列表列，而列表列元素可存储各种复杂的数据（如回归模型结果列表或者数据框），并通过键变量或位置和其它变量自然绑定起来，更便于进行后续的数据处理。", correct = TRUE),
+    answer("通常可在 `mutate()` 中结合 `map` 族函数对数据集的列表列进行处理，生成新的原子向量列或列表列。", 
+           correct = TRUE),
+    correct = "Good job！", 
+    try_again = "错误，请重试！",
+    post_message = "列表列 + `map` 族函数给优雅地处理数据提供更多可能，真心 &#x1F496; 推荐速速入手！", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("7 以下关于 `tidyquant` 包、`tsibble` 包和 `slider` 包说法正确的有：",
+    answer("`tidyquant` 包在 `tidyverse` 与传统的金融分析 R 包（如 `quantmod` 包）之间架起桥梁。", 
+           correct = TRUE),
+    answer("`tq_get()`、`tq_mutate()` 和 `tq_performance()` 分别用来获取数据、生成新变量和计算绩效指标。", 
+           correct = TRUE),
+    answer("`tq_mutate()` 支持来自 `xts`、`zoo`、`quantmod`、`TTR` 和 `PortfolioAnalytics` 包的100+个函数。", correct = FALSE, 
+           message = "大家来找茬环节 &#x1F575;&#xFE0F;——事实上是同一群人开发的 `PerformanceAnalytics` 包，而非 `PortfolioAnalytics` 包。<br>"),
+    answer("`tsibble` 包为齐整时间序列分析提供基础的数据结构和工具，核心函数为 `as_tsibble()`。", 
+           correct = TRUE),
+    answer("`slider` 包对任意 R 数据类型提供一致的类似于 `purrr` 包 `map` 族函数的窗口函数运算。", 
+           correct = TRUE),
+    correct = "Good job！", 
+    try_again = "错误，多选题，请重试！",
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("8 以下关于字符串、因子、日期-时间变量处理说法正确的有：",
+    answer("`stringr` 包很多函数的 `pattern` 参数支持正则表达式，这赋予其强大的模式匹配能力。", 
+           correct = TRUE),
+    answer("`stringr::str_length()`、`str_replace_all()`、`str_extract_all()` 和 `str_sub()` 等函数均返回与输入向量等长的向量，能直接用在 `dplyr::mutate()` 函数中生成新变量。", correct = TRUE, 
+           message = '由于 `data.frame` 支持列表列，而`str_extract_all()` 返回的是等长的列表，自然也就能直接用于 `dplyr::mutate()` 函数中生成新变量。<br>'),
+    answer("`forcats::fct_relevel()`、`fct_collapse()`、`fct_lump_prop()`、`fct_other()` 等函数用来调整因子水平。",  correct = FALSE, 
+           message = "`fct_relevel()` 用于调整因子次序，记住啦！<br>"),
+    answer("`forcats::fct_recode()`、`fct_reorder()`、`fct_infreq()` 等函数用来调整因子次序。", correct = FALSE, 
+           message = "`fct_recode()` 用于重编码（调整）因子水平，记住啦！<br>"),
+    answer('日期-时间的处理并不简单，相关的 R 包往往都需要将时间存储为（相对某个基点时间算起的）数值，如 `lubridate::as_date("1970-01-01")` 在内部存储为数值 `1`。', 
+           correct = FALSE, 
+           message = '`lubridate::as_date("1970-01-01") %>% unclass()` —— 原来是 `0`啊！<br>'),
+    correct = "选对啦，又得2分！", 
+    try_again = "错误，请重试！",
+    post_message = "这学期比较迟才讲述到字符串、因子、日期-时间的处理，但这些均是非常重要的数据预处理能力，务必掌握！", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("9 以下关于 `tidymodels` 套装说法正确的有：",
+    answer("`library(tidymodels)` 会同时加载 `tidyverse` 的几个核心包，如 `tibble`、`tidyr` 等，这在一定程度上反映了 `tidymodels` 也会遵循 `tidyverse` 的设计理念、语法和数据结构。", 
+           correct = TRUE),
+    answer("`tidymodels` 套装多采用现有的数据结构（如 `tsibble`），这使得我们能直接使用已掌握的工具和技能，如 `dplyr::mutate()`、`purrr::map()`、`tidyr::unnest()`等。", 
+           correct = FALSE, 
+           message = "大家来找茬 &#x1F575;&#xFE0F; —— 是 `tibble` 而非 `tsibble` 啦。`tsibble` 是 `tidyvert` 的基础数据结构。<br>"),
+    answer("`recipes` 包将变量预处理步骤的定义、参数估计和应用区分开，这使得我们能更加方便且一致地将相同的处理步骤和参数应用于不同数据集（如训练集和测试集）。", 
+           correct = TRUE),
+    answer("`parsnip` 包以统一的接口调用相关的机器学习包，完成“模型设定->拟合->预测”更加便捷。", 
+           correct = TRUE),
+    answer("`yardstick` 包将数据预处理、模型设定和拟合后处理等建模流程捆绑为一个 `workflow` 对象，更方便我们进行模型拟合、预测和参数调优。", 
+           correct = FALSE, 
+           message = "应该是 `workflows` 包 —— 这点应该很明显！<br>"),
+    correct = "选对啦！", 
+    try_again = "错误，请重试！",
+    post_message = "我们只花了 很少^2 的时间介绍 `tidymodels` 套装，若同学们对统计建模、机器学习等话题感兴趣，应该根据提供的进一步学习资料认真了解下这组新包！", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("10 以下关于 R 代码说法正确的有（已加载 `tidyverse` 和 `tsibble` 包）：",
+    answer("`nycflights13::flights %>% group_by(year, month, day) %>% 
+slice_min(n = 1, order_by = arr_delay)` 会提取出每日到达延误时间最长的航班。", 
+           correct = FALSE, 
+           message = "是 `slice_max()` 才对！<br>"),
+    answer('如果 `lms <- mtcars %>% split(.$cyl) %>% map(~ lm(mpg ~ wt, data = .))`，那么我们可用 `lms %>% map(summary) %>% map_dbl("r.squared")` 中从 `lms` 中提取出各个回归模型的 R^2 。', 
+           correct = TRUE),
+    answer('`str_replace("600001.SH.csv", "//.csv$", "")` 将返回字符串 `"600001.SH"`。', correct = FALSE, 
+           message = '是 `str_replace("600001.SH.csv", "\\.csv$", "")` 才对！<br>'),
+    answer("`nycflights13::flights %>% mutate(date = lubridate::ymd(year, month, day))` 能基于 `flights` 数据集的变量 `year`、`month` 和 `day` 生成正确的日期型变量 `date`。", correct = FALSE, 
+           message = "是 `lubridate::make_date(...)` 才对！<br>"),
+    answer('`tidyquant::FANG %>% as_tsibble(key = symbol, index = date) %>%
+filter_index("2016-05")` 会将 `FANG` 数据集转换为 `tbl_ts` 对象，并提取出每家公司2016年5月的交易数据。', 
+           correct = TRUE),
+    correct = "Good job！&#x1F44D;", 
+    try_again = "错误！可在代码窗口中键入相应代码后重试！",
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  caption = "不定项选择题"
+)
+
+```
+
+
+<br>
+
+### `r emo::ji("raising_hand_woman")` 提交不定项选择题的答案
+
+请同学们点击下面的 [Generate] 按钮在方框中生成答案的 hash 码，然后点击方框右上角上的复制按钮，并将得到的hash码直接粘贴到 ~~[坚果云 Excel 表格收集表 QFwR-L20]()~~ 中。
+
+```{r context="server"}
+learnrhash::encoder_logic()
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(ui_before = NULL)
+```
+
+
+## `r emo::ji("woman_technologist")` 上机实操练习
+
+### NULL，&#x1F937;
