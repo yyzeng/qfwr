@@ -1,0 +1,40 @@
+Package: qfwr
+Type: Package
+Title: Tutorials for "Quantitative Finance with R" course
+Version: 0.1.01
+Author: Yongyi Zeng
+Maintainer: Yongyi Zeng <zzyy@xmu.edu.cn>
+Description: Tutorials for my course "Quantitative Finance with R" 
+    (QFwR) to facilitate teaching and learning. The interactive 
+    exercise is mainly powered by RStudio's `learnr`, `gradethis` 
+    package and some ideas / codes stolen from Prof. Rundel's 
+    `learnrhash`.
+URL: https://github.com/yyzeng/qfwr
+BugReports: https://github.com/yyzeng/qfwr/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    learnr (>= 0.10.1.9000),
+    remotes (>= 2.0),
+    testwhat (>= 4.9.8),
+    emo (>= 0.0.0.9000),
+    base64enc,
+    shiny,
+    dplyr,
+    tidyr,
+    purrr,
+    tibble,
+    rlang,
+    magrittr
+Suggests: 
+    maps (>= 3.0.0), 
+    tidyverse (>= 1.3.1)
+Remotes: 
+    rstudio/learnr,
+    datacamp/testwhat,
+    hadley/emo
+Depends:
+    R (>= 3.6)
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2

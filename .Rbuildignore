@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README.R?md$
+^data-raw$
+^docs$
+^inst/tutorials/.*\.html$

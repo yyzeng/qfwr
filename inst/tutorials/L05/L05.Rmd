@@ -1,0 +1,473 @@
+---
+title: "L05 `dplyr` 数据变换"
+author: "曾永艺"
+date: "2021年10月25日"
+tutorial:
+  id: L05
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: "tibble"
+description: >
+  这是厦门大学管理学院财务学系 **“量化金融与金融编程”** 
+  课程 _“第5讲 `dplyr` 数据变换”_ 的配套练习。
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(gradethis)
+library(testwhat)
+library(nycflights13)
+library(tidyverse)
+library(qfwr)
+# options(tibble.print_max = 6, tibble.print_min = 4)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(
+  # exercise.cap = NULL,
+  # exercise.eval = FALSE,
+  exercise.timelimit = 60, #<<
+  # exercise.lines = NULL,
+  exercise.blanks = FALSE, #<<
+  exercise.checker = testwhat::testwhat_learnr, #<<
+  # exercise.error.check.code = NULL,
+  # exercise.completion = TRUE,
+  # exercise.diagnostics = TRUE,
+  # exercise.startover = TRUE,
+  exercise.reveal_solution = FALSE #<<
+)
+```
+
+
+## `r emo::ji("book")` 基础概念题
+
+以下选择题主要用来测试同学们对本讲所讲基础概念和核心函数的理解和掌握情况——
+这是熟练运用各种函数完成数据处理任务的基本功 `r emo::ji("muscle")`。
+
+```{r quiz}
+quiz(
+  question("1 构成 `dplyr` 包数据处理语言基本操作的函数包括：",
+           answer("`filter()`", correct = TRUE),
+           answer("`arrange()`", correct = TRUE),
+           answer("`mutate()`", correct = TRUE),
+           answer("`subset()`"),
+           answer("`select()`", correct = TRUE),
+           answer("`summarise()`", correct = TRUE),
+           answer("`group_by()`", correct = TRUE),
+           correct = random_praise_cn(), # "正确！",
+           incorrect = "错误！参见 _R数据科学_ 的3.1.3小节。",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  question("2 以下哪些命令是对数据表的行（样本）进行操作的？",
+           answer("`filter()`", correct = TRUE),
+           answer("`arrange()`", correct = TRUE),
+           answer("`mutate()`"),
+           answer("`transmute()`"),
+           answer("`select()`"),
+           answer("`slice()`", correct = TRUE),
+           correct = random_praise_cn(), # "Great！",
+           incorrect = random_encouragement_cn(), # "错误，请重试！",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  question("3 以下哪些命令与数据表的列（变量）操作有关？",
+           answer("`filter()`"),
+           answer("`arrange()`"),
+           answer("`mutate()`", correct = TRUE),
+           answer("`transmute()`", correct = TRUE),
+           answer("`select()`", correct = TRUE),
+           answer("`rename()`", correct = TRUE),
+           answer("`relocate()`", correct = TRUE),
+           correct = random_praise_cn(), # "Excellent！",
+           incorrect = random_encouragement_cn(), # "错误，请重试！",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  question("4 以下关于 `dplyr` 包中函数说法正确的有：",
+           answer("`summarise()` 中比较少使用<i>N</i>元素进<i>N</i>元素出的
+                  向量化的函数，如 `log()`。", correct = TRUE),
+           answer("`mutate()` 总是将新变量添加在数据集的最前面。"),
+           answer('`transmute()` 仅保留新变量和分组变量，其效果和设定参数 
+                  `.keep = "none"` 的 `mutate()` 函数相同。', correct = TRUE),
+           answer("`select()` 可在选择变量的同时对变量进行重命名。", 
+                  correct = TRUE),
+           answer("`group_by()` 生成分组数据集，可能会对后续的数据操作产生影响，
+                  必要时可用 `ungroup()` 取消分组设定。", 
+                  correct = TRUE),
+           correct = random_praise_cn(), # "漂亮！",
+           incorrect = random_encouragement_cn(), # "错误，请重试！",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  question("5 以下关于多表操作说法正确的有：",
+           answer("数据处理实践中最常用的合并式连接命令为 `left_join()`。", 
+                  correct = TRUE),
+           answer("`semi_join()` 和 `anti_join()` 完成的是样本筛选式连接。",
+                  correct = TRUE),
+           answer("`*_join()` 族命令的 `on` 参数用来设定连接所用的键变量，
+                  支持灵活多样的设定。", 
+                  message = "到底是`on`还是`by`呢？这是个问题！&#x1F914;"),
+           answer("`bind_cols()` 基于行序对多个数据集进行横向合并，
+                  无需指定键变量。", correct = TRUE),
+           answer("`bind_rows()` 基于变量名对多个数据集进行纵向合并。", 
+                  correct = TRUE),
+           correct = random_praise_cn(), # "答对了！给你点赞！",
+           incorrect = random_encouragement_cn(), # "错误，请重试！",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  question("6 以下关于 `dplyr` 包优点概括正确的有：",
+           answer("`dplyr` 以一组简洁清晰的动词函数来处理常见的数据操作任务。", 
+                  correct = TRUE),
+           answer("`dplyr` 核心函数的第一个参数为数据集，返回值也为数据集，
+                  能很好支持管道操作 `%>%`。", correct = TRUE),
+           answer("`dplyr` 能通过接口包（如 `dbplyr` 和 `dtplyr`）以相同的函数
+                  接口操作其他常见的数据库（如 `SQLite`）和 R 数据结构（如 
+                  `data.table`）。", correct = TRUE),
+           answer("`dplyr` 通过 `C++` 实现很多关键的底层代码，从而实现对内存中
+                  数据的高效运算。", correct = TRUE),
+           correct = random_praise_cn(), # "Bingo！",
+           incorrect = random_encouragement_cn(), # "错误，请重试！",
+           allow_retry = TRUE,
+           random_answer_order = TRUE
+  ),
+  caption = "不定项选择题"
+)
+
+```
+
+## `r emo::ji("woman_technologist")` 编程练习
+
+### 练习1. 了解数据集 {data-allow-skip=TRUE}
+
+我已经用`library()`命令帮同学们载入代码练习所需用到**`dplyr`**包、
+**`ggplot2`**包以及**`nycflights13`**数据包。
+
+首先，请同学们在下面代码窗口键入相关命令来大致了解相关的数据集和`learnr`代码
+输入窗口的基本操作。
+
+**Hint：**
+
+- 点击`Start Over`按钮重新开始本练习
+- 点击`Hints`按钮得到相应提示，然后点击`Next Hint>>`获取下一条提示［注意：用`Copy to Clipboard`按键复制**多行**代码直接运行可能会报错。］
+- 点击`Run Code`按钮［或使用快捷键`Ctrl+Shift+Enter`］执行代码
+
+```{r data, exercise=TRUE, exercise.lines=3}
+
+```
+
+```{r data-hint-1}
+help(package = "nycflights13") # 打开数据包帮助文档
+```
+
+```{r data-hint-2}
+?flights  # 打开flights（航班）数据集的帮助文档
+```
+
+```{r data-hint-3}
+flights  # 打印flights数据集
+```
+
+```{r data-hint-4}
+glimpse(flights)  # 概览flights数据集
+```
+
+```{r data-hint-5}
+View(flights)  # 在数据浏览窗口中打开flights数据集
+```
+
+接下来我们分几个小练习，逐一了解下基本的数据操作函数。
+
+### 练习2. 筛选样本
+
+找出`flights`数据集中出发延误至少1小时，但在飞行过程中追回至少30分钟的航班。
+
+```{r filter, exercise=TRUE, exercise.reveal_solution=TRUE}
+# ____(____, dep_delay >= 60, ____)
+
+```
+
+```{r filter-hint}
+1. 代码窗口中的注释为代码的模板；
+2. 你可以在代码窗口中键入`flights`，然后点击`Run Code`按钮，了解应使用的变量名；
+3. 完成代码后，记得点击`Submit Answer`检查答案正确与否；
+& ...
+4. 点击`Next Hint>>`查看参考答案。
+```
+
+```{r filter-solution}
+# 参考答案
+filter(flights, dep_delay >= 60, arr_delay - dep_delay <= -30)
+```
+
+```{r filter-check}
+nc_msg <- "`dplyr`包中筛选样本的函数是`filter()`，你选对了吗？"
+argns_msg <- "`filter()`函数的`.data`参数设置有误。"
+inc_msg = "你确定你设定的筛选条件正确吗？参见`Hints`。"
+ex() %>% check_function(., "filter", not_called_msg = nc_msg) %>% {
+  check_arg(., ".data", arg_not_specified_msg = argns_msg) %>% 
+    check_equal(eval = FALSE)
+  check_result(.) %>% 
+    check_equal(incorrect_msg = inc_msg, append = FALSE)
+}
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### 练习3. 选择变量
+
+从`flights`数据集中选出变量`year`、`month`、`day`、`dep_time`和`dep_delay`等5个变量，将前三个变量分别更名为`nian`、`yue`、`ri`，并存为新数据集`flights_sml`［此题比较简单就不给你们`Hints`啦。］
+
+```{r select, exercise=TRUE}
+flights 
+# flights_sml <- ...
+
+# flights_sml
+
+```
+
+```{r select-solution}
+# 参考答案
+flights_sml <- select(flights, 
+                      nian = year, yue = month, ri = day,
+                      dep_time, dep_delay)
+```
+
+```{r select-check}
+nc_msg <- "最适合这个问题的函数就是`dplyr`包中用来选取（并重命名）变量的函数`select()`，你选对了吗？"
+ex() %>% check_function("select", not_called_msg = nc_msg)
+
+ud_msg  <- "你忘记将`select()`函数返回结果存为新数据集`flights_sml`了？"
+miss_msg <- "你可能忘记选取并_重命名_变量啦？`select()`函数可以一石二鸟。"
+miss_msg2 <- "你可能忘记 选取 所需的变量啦？"
+ex() %>% check_object("flights_sml", undefined_msg = ud_msg) %>% 
+  check_equal()
+  # %>% 
+  # check_correct(
+  #   check_equal(., eq_condition = "equal"),
+  #   {
+  #     check_column(., "nian", col_missing_msg = miss_msg, append = FALSE)
+  #     check_column(., "yue", col_missing_msg = miss_msg, append = FALSE)
+  #     check_column(., "ri", col_missing_msg = miss_msg, append = FALSE)
+  #     check_column(., "dep_time", col_missing_msg = miss_msg2,
+  #                  append = FALSE)
+  #     check_column(., "dep_delay", col_missing_msg = miss_msg2,
+  #                  append = FALSE)
+  #   }
+  # )
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### 练习4. 变量修改
+
+`flights`数据集中现有的变量`dep_time`、`sched_dep_time`、`arr_time`、`sched_arr_time`等的取值并不规范，请将它们“原地”修改为从午夜开始的分钟数，并将修改后的数据存为`flights_new`。
+
+```{r mutate, exercise=TRUE, exercise.reveal_solution=TRUE}
+flights 
+# flights_new <- ...
+
+# flights_new
+
+```
+
+```{r mutate-hint-1}
+1. 不难看出，这些变量的后两位数字为分钟，之前的一至两位数字为小时，
+   即1401表示14:01，想想有什么好办法可将它们拆解开。
+```
+
+```{r mutate-hint-2}
+1. help("Arithmetic")，看看有无合适的运算符？
+2. 请先尝试下，然后再点击`Next Hint>>`查看参考答案。
+```
+
+```{r mutate-hint-3}
+! 你自行尝试探索解决问题了吗？
+! 你确定、一定以及肯定想看参考答案吗？
+! 好吧，点击`Next Hint>>`查看参考答案 ……
+```
+
+```{r mutate-solution}
+# 参考答案
+flights_new <- mutate(
+  flights,
+  dep_time = dep_time %/% 100 * 60 + dep_time %% 100,
+  sched_dep_time = sched_dep_time %/% 100 * 60 + sched_dep_time %% 100,
+  arr_time = arr_time %/% 100 * 60 + arr_time %% 100,
+  sched_arr_time = sched_arr_time %/% 100 * 60 + sched_arr_time %% 100
+)
+
+```
+
+```{r mutate-check}
+nc_msg <- "你用什么函数呢？`dplyr`包生成新变量/修改变量的大杀器就是`mutate()`函数。"
+ex() %>% check_function("mutate", not_called_msg = nc_msg)
+
+ud_msg <- "你忘记将`mutate()`函数返回结果存为新数据集`flights_sml`了？"
+msg    <- "仔细检查下，计算公式写错了？"
+ex() %>% check_object("flights_new", undefined_msg = ud_msg) %>% {
+    check_column(., "dep_time") %>%
+      check_equal(incorrect_msg = msg, append = FALSE)
+    check_column(., "sched_dep_time") %>%
+      check_equal(incorrect_msg = msg, append = FALSE)
+    check_column(., "arr_time") %>%
+      check_equal(incorrect_msg = msg, append = FALSE)
+    check_column(., "sched_arr_time") %>%
+      check_equal(incorrect_msg = msg, append = FALSE)
+}
+
+success_msg(paste0(random_praise_cn(code = TRUE), 
+                   "几乎相同的代码重复了四次，我错了两次，你呢？"))
+```
+
+
+### 练习5. 分组汇总
+
+根据`flights`数据集分组汇总计算每日航班出发延误时间的**中位数**，存为新数据集`mdelay_by_day`（不使用管道操作符`%>%`）。
+
+```{r summarise, exercise=TRUE, exercise.lines=4}
+# by_day <- ___(flights, ___, ___, ___)
+# mdelay_by_day <- ___(by_day, mdelay = ___)
+# mdelay_by_day
+
+```
+
+```{r summarise-hint-1}
+1. 代码窗口中已给出代码模板。
+2. 此题比较简单，就不给参考答案。
+```
+
+```{r summarise-hint-2}
+1. 若实在搞不定，我也只能告诉你计算中位数的函数是
+   `median(x, na.rm = FALSE, ...)`
+```
+
+```{r summarise-solution}
+# 参考答案
+by_day <- group_by(flights, year, month, day)
+mdelay_by_day <- summarize(by_day, mdelay = median(dep_delay, na.rm = TRUE))
+```
+
+```{r summarise-check}
+ud_msg1 <- "找不到数据集by_day。请使用by_day变量保存分组后的数据集。"
+ex() %>% {
+  check_object(., "by_day", undefined_msg = ud_msg1)
+  check_function(., "group_by") %>% {
+    check_arg(., ".data") %>% check_equal(eval = FALSE)
+    check_arg(., "...") %>% check_equal(eval = FALSE)
+    check_result(.) %>% check_equal()
+  }
+}
+
+ud_msg2 <- "找不到数据集mdelay_by_day。你忘记将生成的汇总数据保存为该数据集了？"
+ex() %>% {
+  check_object(., "mdelay_by_day", undefined_msg = ud_msg2)
+  check_function(., "summarise", not_called_msg = "汇总数据就用`summarise()`！") %>% 
+    check_arg(., ".data") %>% check_equal(eval = FALSE)
+  check_function(., "median", not_called_msg = "你未使用median()函数？") %>% {
+    check_arg(., "x") %>% check_equal(eval = FALSE)
+    check_arg(., "na.rm") %>% check_equal()
+  }
+}
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### 练习6. 综合运用
+
+图示2013年6月13日航班平均**到达**延误时间的空间分布情况，如下图：
+
+```{r delay_0613, echo=FALSE, warning=FALSE, message=FALSE, fig.asp=0.4, out.width='80%', dpi=400}
+flights %>%
+  filter(year == 2013, month == 6, day == 13) %>% 
+  group_by(dest) %>%
+  summarise(mean_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  left_join(airports, by = c("dest" = "faa")) %>% 
+  ggplot(aes(lon, lat)) + 
+  borders("state") + 
+  geom_point(aes(size = mean_delay), shape = 1) + 
+  coord_quickmap()
+```
+
+```{r join, exercise=TRUE, exercise.lines=12}
+# flights %>% 
+#   ___ %>%       # 筛选数据
+#   ___ %>%       # 分组
+#   ___ %>%       # 计算汇总统计量
+#   ___(airports, by = ___) %>%   # 合并式连接
+#   ggplot(aes(lon, lat)) + 
+#   borders("state") + 
+#   geom_point(aes(size = mean_delay), shape = 1) + 
+#   coord_quickmap()
+
+```
+
+```{r join-hint}
+1. 代码窗口中已给出使用 %>% 的代码模板，制图部分的代码已全部给出
+2. 此题步骤相对多些，但并不难（我还是不准备给你显示参考答案，:)）
+3. 你可采取逐步运行的方法（输入部分代码，按`Run Code`看结果）
+4. 你会用到的四个函数为：group_by()、filter()、left_join()、summarise()
+
+```
+
+```{r join-solution}
+# 参考答案
+flights %>%
+  filter(year == 2013, month == 6, day == 13) %>% 
+  group_by(dest) %>%
+  summarise(mean_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  left_join(airports, by = c("dest" = "faa")) %>% 
+  ggplot(aes(lon, lat)) + 
+  borders("state") + 
+  geom_point(aes(size = mean_delay), shape = 1) + 
+  coord_quickmap()
+```
+
+```{r join-check}
+inc_msg = "你设定的筛选条件正确吗？记得是6月13日哦。"
+ex() %>% check_function(., "filter") %>% {
+  check_arg(., ".data") %>% check_equal(eval = FALSE)
+  check_result(.) %>% 
+    check_equal(incorrect_msg = inc_msg, append = FALSE)
+}
+
+ex() %>% check_function(., "group_by") %>% {
+  check_arg(., "...") %>% 
+    check_equal(eval = FALSE, append = FALSE, 
+                incorrect_msg = "要按目的地`dest`进行分组。")
+}
+
+ex() %>% check_function(., "summarise") %>% 
+  check_result(.) %>% 
+  check_equal(incorrect_msg = "汇总计算结果有误，请仔细检查下。", 
+              append = FALSE)
+
+ex() %>% check_function(., "left_join") %>% {
+  check_arg(., "y") %>% 
+    check_equal(eval = FALSE, append = FALSE, 
+                incorrect_msg = "要合并的是机场数据集`airports`。")
+  check_arg(., "by") %>% 
+    check_equal(eval = FALSE, incorrect_msg = '`by = c("dest" = "fass")`')
+}
+
+ex() %>% check_function(., "ggplot")
+ex() %>% check_function(., "geom_point")
+  
+success_msg(paste0(random_praise_cn(code = TRUE),
+                   "你已经会用管道操作符渐进式解决问题！"))
+```
+
+<br>
+
+## `r emo::ji("raising_hand_woman")` 提交练习答案
+
+```{r ui, echo=FALSE}
+qfwr:::submission_ui(cid = "f7b7af3cdfc6496ea9af436ed77bd59a")
+```
+
+```{r context = "server"}
+qfwr:::submission_server()
+```
+
