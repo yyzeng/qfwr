@@ -1,0 +1,128 @@
+---
+title: "L06 数据导入与齐整"
+author: "我叫那个啥"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  fig.align='center', out.width='80%', dpi = 400
+)
+```
+
+在 `learnr::tutorial()` 中同学们基于老师给出（限定性）模板完成以下练习1-4的代码练习，但能通过代码检查并不就意味着同学们已经掌握R数据处理的基本流程和核心函数。同学们应试下自己能否独立 / 独力完成相同的研究任务，甚至找到更好的实现方式和代码。加油！`r emo::ji("muscle")` <span style='color:red'>［同学们自行完成，此文档不用提交至 坚果云收件箱 `r emo::ji("postbox")`。］</span>
+
+## 练习1. 读入并处理 `ipos_profile.csv`
+
+```{r}
+# ...
+
+
+
+
+
+
+```
+
+## 练习2. 读入并处理 `ipos_rets.xlsx`
+
+```{r}
+# ...
+
+
+
+
+
+
+```
+
+
+## 练习3. 合并数据集
+
+```{r}
+# ...
+
+
+
+
+
+
+```
+
+
+## 练习4. 理解“首日收益率”的时序变化
+
+```{r}
+# ...
+
+
+
+
+
+
+```
+
+
+## 练习5. 进一步探索性分析
+
+可在控制台 Console 键入 qfwr::qfwr_key("L06", "L06-lab-ex05") 查看参考答案
+
+### 5.1 IPO网上申购中签率的时序变化
+
+示例图：
+
+```{r ex5-1, echo=FALSE}
+dp <- system.file("tutorials", "L06", "L06-lab", package = "qfwr")
+knitr::include_graphics(file.path(dp, "ex5-1.png"))
+```
+
+代码：
+
+```{r}
+# ipos %>% 
+#   ggplots %>% ...
+
+```
+
+
+### 5.2 IPO网上申购中签率和网下申购中签率的关系及其变动
+
+
+示例图：
+
+```{r ex5-2, echo=FALSE}
+dp <- system.file("tutorials", "L06", "L06-lab", package = "qfwr")
+knitr::include_graphics(file.path(dp, "ex5-2.png"))
+```
+
+代码：
+
+```{r}
+# ipos %>% 
+#   ggplots %>% ...
+
+```
+
+
+### 5.3 IPO网上申购中签率和首日收益率的关系及其变动
+
+示例图：
+
+```{r ex5-3, echo=FALSE}
+dp <- system.file("tutorials", "L06", "L06-lab", package = "qfwr")
+knitr::include_graphics(file.path(dp, "ex5-3.png"))
+```
+
+代码：
+
+```{r}
+# ipos %>% 
+#   ggplots %>% ...
+
+```
+
+

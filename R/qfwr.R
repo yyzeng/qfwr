@@ -40,7 +40,9 @@ NULL
 #'
 #' @export
 qfwr_ex <- function(lecture) {
-  learnr::run_tutorial(lecture, package = "qfwr")
+  suppressWarnings(
+    learnr::run_tutorial(lecture, package = "qfwr")
+  )
 }
 
 
@@ -81,15 +83,25 @@ qfwr_ls <- function() {
 #'
 #' @name qfwr_lab
 #' 
-#' @importFrom utils file.edit
+#' @importFrom rstudioapi isAvailable documentNew
 #' 
 #' @export
 qfwr_lab <- function(lecture = NULL) {
   lab <- system.file("tutorials", lecture, paste0(lecture, "-lab"),
                      paste0(lecture, "-lab", ".Rmd"),
                      package = "qfwr")
-  if (lab == "") stop("The specified lab's instruction Rmd file don't exist.")
-  file.edit(lab, fileEncoding = "UTF-8")
+  if(lab == "") stop("The specified lab's instruction Rmd file doesn't exist.")
+  if(isAvailable()) {
+    documentNew(
+      readLines(lab, encoding = "UTF-8"), 
+      type = "rmarkdown",
+      position = c(0, 0),
+      execute = FALSE
+    )
+  } else {
+    stop("`qfwr_lab() can only be called in RStudio IDE.")
+  }
+  # file.edit(lab, fileEncoding = "UTF-8")
   invisible(lab)
 }
 
@@ -114,7 +126,17 @@ qfwr_key <- function(lecture = NULL, exercise = NULL) {
   ans_key <- system.file("tutorials", lecture, paste0(lecture, "-lab"),
                          paste0(exercise, ".R"),
                          package = "qfwr")
-  if (ans_key == "") stop("The specified answer key file don't exist.")
-  file.edit(ans_key, fileEncoding = "UTF-8")
+  if(ans_key == "") stop("The specified answer key file doesn't exist.")
+  if(isAvailable()) {
+    documentNew(
+      readLines(ans_key, encoding = "UTF-8"), 
+      type = "r",
+      position = c(0, 0),
+      execute = FALSE
+    )
+  } else {
+    stop("`qfwr_key() can only be called in RStudio IDE.")
+  }
+  # file.edit(ans_key, fileEncoding = "UTF-8")
   invisible(ans_key)
 }

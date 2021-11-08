@@ -1,7 +1,7 @@
 Package: qfwr
 Type: Package
 Title: Tutorials for "Quantitative Finance with R" course
-Version: 0.1.01
+Version: 0.1.02
 Author: Yongyi Zeng
 Maintainer: Yongyi Zeng <zzyy@xmu.edu.cn>
 Description: Tutorials for my course "Quantitative Finance with R" 

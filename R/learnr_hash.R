@@ -74,7 +74,7 @@ submission_ui <- function(cid = NULL) {
 #
 # @return Location of the rds file
 # @export
-save_rds <- function(file, session){
+save_rds <- function(file, session) {
   
   state <- learnr::get_tutorial_state(session = session)
   shiny::validate(shiny::need(length(state) > 0, "No progress yet."))
@@ -88,6 +88,7 @@ save_rds <- function(file, session){
     .groups = "drop"
   )
   user_state <- dplyr::relocate(user_state, .data$correct, .before = .data$timestamp)
+  attr(user_state, "si") <- Sys.info()[-c(6:8)]
   
   saveRDS(qfwr:::encode_obj(user_state), file)
   
@@ -99,7 +100,7 @@ save_rds <- function(file, session){
 # @param obj      R object.
 # @param compress Compression method.
 # 
-encode_obj <- function(obj, compress = c("bzip2", "gzip", "xz", "none"))  {
+encode_obj <- function(obj, compress = c("bzip2", "gzip", "xz", "none")) {
   compress = match.arg(compress)
   
   raw = serialize(obj, NULL)

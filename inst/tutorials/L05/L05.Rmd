@@ -3,7 +3,8 @@ title: "L05 `dplyr` 数据变换"
 author: "曾永艺"
 date: "2021年10月25日"
 tutorial:
-  id: L05
+  id: qfwr-L05
+  version: 0.1.01
 output: 
   learnr::tutorial:
     progressive: true
@@ -40,7 +41,7 @@ tutorial_options(
 ```
 
 
-## `r emo::ji("book")` 基础概念题
+## `r emo::ji("book")`基础概念题
 
 以下选择题主要用来测试同学们对本讲所讲基础概念和核心函数的理解和掌握情况——
 这是熟练运用各种函数完成数据处理任务的基本功 `r emo::ji("muscle")`。
@@ -138,9 +139,15 @@ quiz(
 
 ```
 
-## `r emo::ji("woman_technologist")` 编程练习
+### <!-- 这三个#非常关键——加上这个，之前提交的exercise答案才会自然恢复 -->
 
-### 练习1. 了解数据集 {data-allow-skip=TRUE}
+## `r emo::ji("woman_technologist")`编程练习
+
+接下来需要同学们循序渐进完成6个简单的编程练习。
+
+### EX01
+
+#### 练习1. 了解数据集
 
 我已经用`library()`命令帮同学们载入代码练习所需用到**`dplyr`**包、
 **`ggplot2`**包以及**`nycflights13`**数据包。
@@ -154,42 +161,47 @@ quiz(
 - 点击`Hints`按钮得到相应提示，然后点击`Next Hint>>`获取下一条提示［注意：用`Copy to Clipboard`按键复制**多行**代码直接运行可能会报错。］
 - 点击`Run Code`按钮［或使用快捷键`Ctrl+Shift+Enter`］执行代码
 
-```{r data, exercise=TRUE, exercise.lines=3}
+```{r ex1, exercise=TRUE, exercise.lines=3}
+# 写点代码并运行
+
 
 ```
 
-```{r data-hint-1}
+```{r ex1-hint-1}
 help(package = "nycflights13") # 打开数据包帮助文档
 ```
 
-```{r data-hint-2}
+```{r ex1-hint-2}
 ?flights  # 打开flights（航班）数据集的帮助文档
 ```
 
-```{r data-hint-3}
+```{r ex1-hint-3}
 flights  # 打印flights数据集
 ```
 
-```{r data-hint-4}
+```{r ex1-hint-4}
 glimpse(flights)  # 概览flights数据集
 ```
 
-```{r data-hint-5}
+```{r ex1-hint-5}
 View(flights)  # 在数据浏览窗口中打开flights数据集
 ```
 
 接下来我们分几个小练习，逐一了解下基本的数据操作函数。
 
-### 练习2. 筛选样本
+
+### EX02
+
+#### 练习2. 筛选样本
 
 找出`flights`数据集中出发延误至少1小时，但在飞行过程中追回至少30分钟的航班。
 
-```{r filter, exercise=TRUE, exercise.reveal_solution=TRUE}
-# ____(____, dep_delay >= 60, ____)
+```{r ex2, exercise=TRUE, exercise.reveal_solution=TRUE}
+____(____, dep_delay >= 60, ____)
 
 ```
 
-```{r filter-hint}
+```{r ex2-hint}
 1. 代码窗口中的注释为代码的模板；
 2. 你可以在代码窗口中键入`flights`，然后点击`Run Code`按钮，了解应使用的变量名；
 3. 完成代码后，记得点击`Submit Answer`检查答案正确与否；
@@ -197,99 +209,109 @@ View(flights)  # 在数据浏览窗口中打开flights数据集
 4. 点击`Next Hint>>`查看参考答案。
 ```
 
-```{r filter-solution}
+```{r ex2-solution}
 # 参考答案
 filter(flights, dep_delay >= 60, arr_delay - dep_delay <= -30)
 ```
 
-```{r filter-check}
+```{r ex2-check}
 nc_msg <- "`dplyr`包中筛选样本的函数是`filter()`，你选对了吗？"
-argns_msg <- "`filter()`函数的`.data`参数设置有误。"
-inc_msg = "你确定你设定的筛选条件正确吗？参见`Hints`。"
+arg1ns_msg <- "你忘记设定`filter()`函数的`.data`参数了？"
+arg2ns_msg <- "你忘记设定`filter()`函数的筛选条件了？"
+inc_msg1 <- "`filter()`函数的`.data`参数设置有误。"
+inc_msg2 <- "你确定你设定的筛选条件完全符合题意吗？仔细检查下。另参见`Hints`。"
 ex() %>% check_function(., "filter", not_called_msg = nc_msg) %>% {
-  check_arg(., ".data", arg_not_specified_msg = argns_msg) %>% 
-    check_equal(eval = FALSE)
-  check_result(.) %>% 
-    check_equal(incorrect_msg = inc_msg, append = FALSE)
+  check_arg(., ".data", arg_not_specified_msg = arg1ns_msg, append = FALSE) %>%
+    check_equal(eval = FALSE, incorrect_msg = inc_msg1, append = FALSE)
+  
+  check_arg(., "...", arg_not_specified_msg = arg2ns_msg, append = FALSE)
+  
+  check_result(.) %>%
+    check_equal(incorrect_msg = inc_msg2, append = FALSE)
 }
 success_msg(random_praise_cn(code = TRUE))
 ```
 
 
-### 练习3. 选择变量
+### EX03
+
+#### 练习3. 选择变量
 
 从`flights`数据集中选出变量`year`、`month`、`day`、`dep_time`和`dep_delay`等5个变量，将前三个变量分别更名为`nian`、`yue`、`ri`，并存为新数据集`flights_sml`［此题比较简单就不给你们`Hints`啦。］
 
-```{r select, exercise=TRUE}
+```{r ex3, exercise=TRUE}
 flights 
-# flights_sml <- ...
+flights_sml <- ...
 
-# flights_sml
+flights_sml
 
 ```
 
-```{r select-solution}
+```{r ex3-solution}
 # 参考答案
 flights_sml <- select(flights, 
                       nian = year, yue = month, ri = day,
                       dep_time, dep_delay)
 ```
 
-```{r select-check}
-nc_msg <- "最适合这个问题的函数就是`dplyr`包中用来选取（并重命名）变量的函数`select()`，你选对了吗？"
-ex() %>% check_function("select", not_called_msg = nc_msg)
+```{r ex3-check}
+nc_msg  <- "尽管有其他实现方式，但最适合解决这个问题的函数就是用`dplyr`包中`select()`函数来选取（并重命名）变量，你选对了吗？"
+udf_msg <- "你忘记将`select()`函数返回结果存为新数据集`flights_sml`了？"
+inc_msg <- "除了题目要求你们选择的5个变量之外，你还_额外_多选了几个变量？"
+cm_msg  <- "你可能忘记选取并按要求_重命名_变量year、month或day了？"
+cm_msg2 <- "你可能忘记_选取_变量dep_time或dep_delay了？"
 
-ud_msg  <- "你忘记将`select()`函数返回结果存为新数据集`flights_sml`了？"
-miss_msg <- "你可能忘记选取并_重命名_变量啦？`select()`函数可以一石二鸟。"
-miss_msg2 <- "你可能忘记 选取 所需的变量啦？"
-ex() %>% check_object("flights_sml", undefined_msg = ud_msg) %>% 
-  check_equal()
-  # %>% 
-  # check_correct(
-  #   check_equal(., eq_condition = "equal"),
-  #   {
-  #     check_column(., "nian", col_missing_msg = miss_msg, append = FALSE)
-  #     check_column(., "yue", col_missing_msg = miss_msg, append = FALSE)
-  #     check_column(., "ri", col_missing_msg = miss_msg, append = FALSE)
-  #     check_column(., "dep_time", col_missing_msg = miss_msg2,
-  #                  append = FALSE)
-  #     check_column(., "dep_delay", col_missing_msg = miss_msg2,
-  #                  append = FALSE)
-  #   }
-  # )
+ex() %>% {
+  check_function(., "select", not_called_msg = nc_msg)
+  check_object(., "flights_sml", undefined_msg = udf_msg) %>% 
+    check_correct(., 
+      check_equal(., incorrect_msg = inc_msg, append = FALSE, 
+                  eq_fun = function(x, y) setequal(names(x), names(y))), 
+      {
+        check_column(., "nian", col_missing_msg = cm_msg, append = FALSE)
+        check_column(., "yue", col_missing_msg = cm_msg, append = FALSE)
+        check_column(., "ri", col_missing_msg = cm_msg, append = FALSE)
+        check_column(., "dep_time", col_missing_msg = cm_msg2, append = FALSE)
+        check_column(., "dep_delay", col_missing_msg = cm_msg2, append = FALSE)
+      }
+    )
+}
 success_msg(random_praise_cn(code = TRUE))
 ```
 
 
-### 练习4. 变量修改
+### EX04
+
+#### 练习4. 变量修改
 
 `flights`数据集中现有的变量`dep_time`、`sched_dep_time`、`arr_time`、`sched_arr_time`等的取值并不规范，请将它们“原地”修改为从午夜开始的分钟数，并将修改后的数据存为`flights_new`。
 
-```{r mutate, exercise=TRUE, exercise.reveal_solution=TRUE}
-flights 
-# flights_new <- ...
+```{r ex4, exercise=TRUE, exercise.reveal_solution=TRUE}
+flights
+flights_new <- ...
 
-# flights_new
+flights_new
 
 ```
 
-```{r mutate-hint-1}
+```{r ex4-hint-1}
 1. 不难看出，这些变量的后两位数字为分钟，之前的一至两位数字为小时，
    即1401表示14:01，想想有什么好办法可将它们拆解开。
 ```
 
-```{r mutate-hint-2}
+```{r ex4-hint-2}
 1. help("Arithmetic")，看看有无合适的运算符？
 2. 请先尝试下，然后再点击`Next Hint>>`查看参考答案。
 ```
 
-```{r mutate-hint-3}
+```{r ex4-hint-3}
 ! 你自行尝试探索解决问题了吗？
 ! 你确定、一定以及肯定想看参考答案吗？
-! 好吧，点击`Next Hint>>`查看参考答案 ……
+! ……
+! 那好吧，点击`Next Hint>>`查看参考答案 ……
 ```
 
-```{r mutate-solution}
+```{r ex4-solution}
 # 参考答案
 flights_new <- mutate(
   flights,
@@ -301,21 +323,23 @@ flights_new <- mutate(
 
 ```
 
-```{r mutate-check}
-nc_msg <- "你用什么函数呢？`dplyr`包生成新变量/修改变量的大杀器就是`mutate()`函数。"
-ex() %>% check_function("mutate", not_called_msg = nc_msg)
+```{r ex4-check}
+nc_msg  <- "你用什么函数呢？`dplyr`包中生成新变量/修改变量的大杀器就是`mutate()`！"
+udf_msg <- "你忘记将`mutate()`函数返回结果存为新数据集`flights_sml`了？"
+inc_msg <- "仔细检查下，肯定有个变量的计算公式写错了！"
 
-ud_msg <- "你忘记将`mutate()`函数返回结果存为新数据集`flights_sml`了？"
-msg    <- "仔细检查下，计算公式写错了？"
-ex() %>% check_object("flights_new", undefined_msg = ud_msg) %>% {
+ex() %>% {
+  check_function(., "mutate", not_called_msg = nc_msg)
+  check_object(., "flights_new", undefined_msg = udf_msg) %>% {
     check_column(., "dep_time") %>%
-      check_equal(incorrect_msg = msg, append = FALSE)
+      check_equal(incorrect_msg = inc_msg, append = FALSE)
     check_column(., "sched_dep_time") %>%
-      check_equal(incorrect_msg = msg, append = FALSE)
+      check_equal(incorrect_msg = inc_msg, append = FALSE)
     check_column(., "arr_time") %>%
-      check_equal(incorrect_msg = msg, append = FALSE)
+      check_equal(incorrect_msg = inc_msg, append = FALSE)
     check_column(., "sched_arr_time") %>%
-      check_equal(incorrect_msg = msg, append = FALSE)
+      check_equal(incorrect_msg = inc_msg, append = FALSE)
+  }
 }
 
 success_msg(paste0(random_praise_cn(code = TRUE), 
@@ -323,63 +347,82 @@ success_msg(paste0(random_praise_cn(code = TRUE),
 ```
 
 
-### 练习5. 分组汇总
+### EX05
+
+#### 练习5. 分组汇总
 
 根据`flights`数据集分组汇总计算每日航班出发延误时间的**中位数**，存为新数据集`mdelay_by_day`（不使用管道操作符`%>%`）。
 
-```{r summarise, exercise=TRUE, exercise.lines=4}
-# by_day <- ___(flights, ___, ___, ___)
-# mdelay_by_day <- ___(by_day, mdelay = ___)
-# mdelay_by_day
+```{r ex5, exercise=TRUE, exercise.lines=4}
+by_day <- ___(flights, ___, ___, ___)
+mdelay_by_day <- ___(by_day, mdelay = ___)
+mdelay_by_day
 
 ```
 
-```{r summarise-hint-1}
+```{r ex5-hint-1}
 1. 代码窗口中已给出代码模板。
 2. 此题比较简单，就不给参考答案。
 ```
 
-```{r summarise-hint-2}
+```{r ex5-hint-2}
 1. 若实在搞不定，我也只能告诉你计算中位数的函数是
    `median(x, na.rm = FALSE, ...)`
 ```
 
-```{r summarise-solution}
+```{r ex5-solution}
 # 参考答案
 by_day <- group_by(flights, year, month, day)
 mdelay_by_day <- summarize(by_day, mdelay = median(dep_delay, na.rm = TRUE))
 ```
 
-```{r summarise-check}
-ud_msg1 <- "找不到数据集by_day。请使用by_day变量保存分组后的数据集。"
+```{r ex5-check}
+udf_msg1g <- "找不到数据集by_day——请使用by_day变量保存分组后的数据集。"
+inc_msg1g <- "group_by()函数的.data参数设置有误。"
+inc_msg2g <- "group_by()函数中分组变量设定有误。"
+inc_msg3g <- "group_by()函数的结果有误，请仔细检查。"
 ex() %>% {
-  check_object(., "by_day", undefined_msg = ud_msg1)
+  check_object(., "by_day", undefined_msg = udf_msg1g)
   check_function(., "group_by") %>% {
-    check_arg(., ".data") %>% check_equal(eval = FALSE)
-    check_arg(., "...") %>% check_equal(eval = FALSE)
-    check_result(.) %>% check_equal()
+    check_arg(., ".data") %>% 
+      check_equal(eval = FALSE, incorrect_msg = inc_msg1g, append = FALSE)
+    check_arg(., "...") %>% 
+      check_equal(eval = FALSE, incorrect_msg = inc_msg2g, append = FALSE)
+    # check_result(.) %>% 
+    #   check_equal(incorrect_msg = inc_msg3g, append = FALSE)
   }
 }
 
-ud_msg2 <- "找不到数据集mdelay_by_day。你忘记将生成的汇总数据保存为该数据集了？"
+udf_msg1s <- "找不到数据集mdelay_by_day——你忘记将生成的汇总数据保存为该数据集了？"
+nc_msg1s  <- "汇总数据就用`summarise()`！"
+nc_msg2s  <- "你在`summarise()`中应该调用`median()`函数来计算中位数。"
+inc_msg1s <- "`summarise()`函数的`.data`参数设置有误。"
+inc_msg2s <- "`median()`函数的`x`参数设置有误。"
+inc_msg3s <- "`median()`函数的`na.rm`参数未设置或设置有误。"
+
 ex() %>% {
-  check_object(., "mdelay_by_day", undefined_msg = ud_msg2)
-  check_function(., "summarise", not_called_msg = "汇总数据就用`summarise()`！") %>% 
-    check_arg(., ".data") %>% check_equal(eval = FALSE)
-  check_function(., "median", not_called_msg = "你未使用median()函数？") %>% {
-    check_arg(., "x") %>% check_equal(eval = FALSE)
-    check_arg(., "na.rm") %>% check_equal()
+  check_object(., "mdelay_by_day", undefined_msg = udf_msg1s)
+  check_function(., "summarise", not_called_msg = nc_msg1s) %>% 
+    check_arg(., ".data") %>% 
+    check_equal(eval = FALSE, incorrect_msg = inc_msg1s, append = FALSE)
+  check_function(., "median", not_called_msg = nc_msg2s) %>% {
+    check_arg(., "x") %>% 
+      check_equal(eval = FALSE, incorrect_msg = inc_msg2s, append = FALSE)
+    check_arg(., "na.rm") %>% 
+      check_equal(incorrect_msg = inc_msg3s, append = FALSE)
   }
 }
 success_msg(random_praise_cn(code = TRUE))
 ```
 
 
-### 练习6. 综合运用
+### EX06
+
+#### 练习6. 综合运用
 
 图示2013年6月13日航班平均**到达**延误时间的空间分布情况，如下图：
 
-```{r delay_0613, echo=FALSE, warning=FALSE, message=FALSE, fig.asp=0.4, out.width='80%', dpi=400}
+```{r ex6-plot, echo=FALSE, warning=FALSE, message=FALSE, fig.asp=0.4, fig.align='center', out.width='80%', dpi=400}
 flights %>%
   filter(year == 2013, month == 6, day == 13) %>% 
   group_by(dest) %>%
@@ -391,20 +434,20 @@ flights %>%
   coord_quickmap()
 ```
 
-```{r join, exercise=TRUE, exercise.lines=12}
-# flights %>% 
-#   ___ %>%       # 筛选数据
-#   ___ %>%       # 分组
-#   ___ %>%       # 计算汇总统计量
-#   ___(airports, by = ___) %>%   # 合并式连接
-#   ggplot(aes(lon, lat)) + 
-#   borders("state") + 
-#   geom_point(aes(size = mean_delay), shape = 1) + 
-#   coord_quickmap()
+```{r ex6, exercise=TRUE, exercise.lines=12}
+flights %>%
+  ___ %>%       # 筛选数据
+  ___ %>%       # 分组
+  ___ %>%       # 计算汇总统计量
+  ___(airports, by = ___) %>%   # 合并式连接
+  ggplot(aes(lon, lat)) +
+  borders("state") +
+  geom_point(aes(size = mean_delay), shape = 1) +
+  coord_quickmap()
 
 ```
 
-```{r join-hint}
+```{r ex6-hint}
 1. 代码窗口中已给出使用 %>% 的代码模板，制图部分的代码已全部给出
 2. 此题步骤相对多些，但并不难（我还是不准备给你显示参考答案，:)）
 3. 你可采取逐步运行的方法（输入部分代码，按`Run Code`看结果）
@@ -412,7 +455,7 @@ flights %>%
 
 ```
 
-```{r join-solution}
+```{r ex6-solution}
 # 参考答案
 flights %>%
   filter(year == 2013, month == 6, day == 13) %>% 
@@ -425,8 +468,8 @@ flights %>%
   coord_quickmap()
 ```
 
-```{r join-check}
-inc_msg = "你设定的筛选条件正确吗？记得是6月13日哦。"
+```{r ex6-check}
+inc_msg = "样本筛选错误——你设定的筛选条件正确吗？记得是6月13日哦。"
 ex() %>% check_function(., "filter") %>% {
   check_arg(., ".data") %>% check_equal(eval = FALSE)
   check_result(.) %>% 
@@ -441,7 +484,7 @@ ex() %>% check_function(., "group_by") %>% {
 
 ex() %>% check_function(., "summarise") %>% 
   check_result(.) %>% 
-  check_equal(incorrect_msg = "汇总计算结果有误，请仔细检查下。", 
+  check_equal(incorrect_msg = "平均延误时间的计算结果有误，请仔细检查下。", 
               append = FALSE)
 
 ex() %>% check_function(., "left_join") %>% {
@@ -449,19 +492,25 @@ ex() %>% check_function(., "left_join") %>% {
     check_equal(eval = FALSE, append = FALSE, 
                 incorrect_msg = "要合并的是机场数据集`airports`。")
   check_arg(., "by") %>% 
-    check_equal(eval = FALSE, incorrect_msg = '`by = c("dest" = "fass")`')
+    check_equal(eval = FALSE, incorrect_msg = 'Hint: `by = c("dest" = "faa")`')
 }
 
-ex() %>% check_function(., "ggplot")
-ex() %>% check_function(., "geom_point")
+nc_msg <- "本题作图部分就不需要折腾修改啦，直接保留代码模板中给出的代码即可。"
+ex() %>% {
+  check_function(., "ggplot", not_called_msg = nc_msg)
+  check_function(., "aes", not_called_msg = nc_msg)
+  check_function(., "borders", not_called_msg = nc_msg)
+  check_function(., "geom_point", not_called_msg = nc_msg)
+  check_function(., "coord_quickmap", not_called_msg = nc_msg)
+}
   
 success_msg(paste0(random_praise_cn(code = TRUE),
-                   "你已经会用管道操作符渐进式解决问题！"))
+                   "恭喜！你已经会用管道操作符渐进式解决问题！"))
 ```
 
 <br>
 
-## `r emo::ji("raising_hand_woman")` 提交练习答案
+## `r emo::ji("raising_hand_woman")`提交练习答案
 
 ```{r ui, echo=FALSE}
 qfwr:::submission_ui(cid = "f7b7af3cdfc6496ea9af436ed77bd59a")

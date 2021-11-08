@@ -1,0 +1,654 @@
+---
+title: "L06 数据导入与齐整"
+author: "曾永艺"
+date: "2021年11月5日"
+tutorial:
+  id: qfwr-L06
+  version: 0.1.02
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: "tibble"
+description: >
+  这是厦门大学管理学院财务学系 **“量化金融与金融编程”** 
+  课程 _“第6讲 数据导入与齐整”_ 的配套练习。
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(testwhat)
+# library(gradethis)
+library(nycflights13)
+library(tidyverse)
+library(qfwr)
+
+# options(tibble.print_max = 6, tibble.print_min = 4)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(
+  # exercise.cap = NULL,
+  # exercise.eval = FALSE,
+  exercise.timelimit = 60, #<<
+  # exercise.lines = NULL,
+  exercise.blanks = FALSE, #<<
+  exercise.checker = testwhat::testwhat_learnr, #<<
+  # exercise.error.check.code = NULL,
+  # exercise.completion = TRUE,
+  # exercise.diagnostics = TRUE,
+  # exercise.startover = TRUE,
+  exercise.reveal_solution = FALSE #<<
+)
+```
+
+
+## `r emo::ji("book")`基础概念题
+
+以下选择题主要用来测试同学们对本讲所讲 R 包及其核心函数相关的基础知识和关键概念的理解和掌握情况。
+
+
+### 1. 导入数据 {data-allow-skip=TRUE}
+
+在下面代码窗口或 RStudio 控制台中用`library()`函数加载 **`tidyverse`** 包和 **`readxl`** 包，然后用`?read_csv`和`?read_excel`依次查看两个包核心数据导入函数的帮助文档，回答以下选择题。
+
+```{r console, exercise=TRUE, exercise.lines=10}
+# 交互式键入函数
+
+```
+
+```{r quiz_DI}
+quiz(
+  question("1.1 清点一下，`read_csv()`的20个参数中有多少个和`read_delim()`的参数是相同的？&#x1F601;",
+    answer("18", message = "你肯定是在瞎蒙！再认真对照下两个函数的参数列表。"), 
+    answer("19", message = "你是蒙的还是算错了？再认真对照下两个函数的参数列表。"), 
+    answer("20", correct = TRUE),
+    answer("21", message = "Are you kidding me?"),
+    correct = "正确！尽管`readr::read_*()`函数族的参数众多，但由于它们共享
+              众多参数，这使得我们的学习更容易举一反三，一通百通，&#x1F60E; 
+              <br> 如果实在清点不过来，在控制台中键入命令`intersect(formalArgs(read_csv), formalArgs(read_delim)) %>% length()`可得到结果。",
+    incorrect = NULL, 
+    allow_retry = TRUE
+  ),
+  
+  question("1.2 如果一个文本文档中各字段用`|`分隔，那么应该使用哪个函数来读取
+           该文档呢？",
+    answer("`read_csv()`",
+           message = "错误。`read_csv()`用来读取`;`分隔的文本文档。"),
+    answer("`read_tsv()`", 
+           message = "错误。`read_tsv()`用来读取`tab`键分隔的文本文档。"),
+    answer("`read_delim()`", correct = TRUE),
+    answer("`read_table()`", 
+           message = "错误。`read_table()`用来读取空格分隔的文本文档。"),
+    correct = paste0(random_praise_cn(), '`read_delim()`可通过设置参数`delim = "|"`来读取用`|`分隔的文本文档。'),
+    incorrect = NULL,
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  question("1.3 想一想执行以下哪些命令会出现有关“解析问题（ _parsing 
+           issues_ ）”的警告？注：先&#x1F914;后&#x2328;&#xFE0F;；`\\n`表示回车符。",
+    answer('`read_csv("a,b\\n1,2,3\\n4,5,6")`', correct = TRUE),
+    answer('`read_csv("a,b,c d\\n1,2,3\\n4,5,6,7")`', correct = TRUE),
+    answer('`read_csv("a,b\\n1,2\\na,b")`'),
+    answer('`read_csv("a;b\\n1;3", delim = ";")`', 
+           message = "`read_csv()`不支持`delim`参数，此时出现 _error_ 而非 _warning_ ！"),
+    correct = random_praise_cn(),
+    incorrect = paste0(random_encouragement_cn(), "你可能需要在 R 控制台中输入代码逐一试看看。"),
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  question("1.4 以下关于`readxl::read_excel()`函数说法正确的有哪些？",
+    answer("该函数有两个变体`read_xls()`和`read_xlsx()`，分别用来读取 .xls 和
+            .xlsx 格式的电子表格文档。", correct = TRUE),
+    answer("相比`read_csv()`函数，它有`sheet`和`range`2
+           个特殊参数（`path`和`.name_repair`相当于`file`和`name_repair`），
+           其余8个参数在`read_csv()`中都有。", correct = TRUE),
+    answer("`sheet`参数指定读入哪张工作表。", correct = TRUE),
+    answer("`range`参数具体指定读入的单元格区域，当和`sheet`、`skip`、
+          `n_max`等参数的设定发生冲突时具有优先权。", correct = TRUE),
+    answer("`col_types`参数的设定方式和`read_csv()`函数中同名参数的
+           设定方式有所不同，但也算简单易记。", correct = TRUE),
+    answer("有个专门的 R 包`cellranger`用来辅助处理`range`参数的设定。", 
+           correct = TRUE), 
+    correct = random_praise_cn(), 
+    incorrect = "错误。请**务必**仔细阅读`read_excel()`函数的帮助文档并重试！",
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  question("1.5 除了使用`readr`包和`readxl`包来读入文本表格和 Excel 表格数据之外，R 
+           还可以读入很多类型的外部数据，以下说法正确的有：",
+    answer("`haven`包提供相应的函数来读入或写出 Stata、SAS 和 SPSS 的数据文件，
+           如`read_stata()`和`write_stata()`。", correct = TRUE),
+    answer("`jsonlite`包可用来解析和生成 [JSON格式](https://www.w3cschool.cn/json/)
+           文本文件。", correct = TRUE), 
+    answer("`DBI`包名如其实，提供 R 与关系型数据库管理系统的接口。", correct = TRUE), 
+    answer("`rvest`包提供从网页上爬取数据的便捷函数。", correct = TRUE),
+    answer("若同学们手头有文本数据、网络关系数据、图像数据、基因组数据等需要读入
+           R中进行后续处理，则一种比较好的方式是到 [CRAN Task Views](https://cran.r-project.org/web/views/) 上了解具体有哪些包可供使用。", correct = TRUE), 
+    correct = paste0(random_praise_cn(), 
+                     "本题的最主要目的在于让同学们初步了解下 R 
+                     读入数据的可能性空间（nengnai）有多大。"), 
+    incorrect = "多选题，请重试。",
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  caption = "**不定项选择题**"
+)
+
+```
+
+
+### 2. 齐整数据
+
+这部分的测试主要关于 **`tibble`** 包和 **`tidyr`** 包，作为`tidyverse`的 8 个核心包
+之一，`library(tidyverse)`会将它们自动载入。
+
+```{r quiz_DT}
+quiz(
+  question("2.1 以下关于`tibble`对象和传统数据框`data.frame`的说法正确的有：",
+    answer("`tibble`对象是 R 传统数据框`data.frame`的一种变体，它是支撑
+          `tidyverse`的核心数据结构，但 R 基础包中用来处理`data.frame`的众多
+          函数并无法直接应用于`tibble`。", correct = FALSE, 
+          message = "`tibble`对象的class也包括\"data.frame\"，因此，
+                    那些用来处理`data.frame`类的函数可直接应用于`tibble`对象。"),
+    answer("在必要时可通过`as_tibble()`和`as.data.frame()`函数进行两者间的
+           相互转换。", correct = TRUE),
+    answer("`tibble`对象在屏幕上的打印列示比传统数据框`data.frame`更为合理。",
+           correct = TRUE), 
+    answer("`tibble`对象支持不符合 R 语法的名称（如特殊字符）作为变量名，可使用
+           `` ` ` `` 实现对不合法变量的引用。", correct = TRUE), 
+    answer("可用`$`和`[[`来提取`tibble`对象中的某一列（变量），但`tibble`对象
+           不支持变量名的部分匹配。", correct = TRUE), 
+    correct = random_praise_cn(), 
+    incorrect = "答错啦！请认真阅读《R数据科学》的第7章、相关 R 包的 
+                cheatsheet 以及`vignette('tibble')`说明文档。", 
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  question("2.2 齐整数据必须满足的三个条件是：<span style='color: red'>（&#x1F4A3; 注意此题答错不允许 Try Again &#x1F4A3;）</span>",
+    answer("每列都是一个变量。", correct = TRUE),
+    answer("每行都是一个观测。", correct = TRUE),
+    answer("每格都是一个取值。", correct = TRUE),
+    answer("每份文档一类数据。", message = "哈，我临时编造了一个条件，&#x1F61C;"),
+    correct = random_praise_cn(),
+    incorrect = "错误！tidy data 需要满足三个 **正确的** 条件。",
+    #allow_retry = TRUE,
+    random_answer_order = TRUE
+  ),
+  
+  question("2.3 以下关于`tidyr`包中的函数说法正确的有：",
+    answer("`pivot_longer()`和`pivot_wider()`分别是之前版本`spread()`和
+          `gather()`函数的升级版。", 
+           message = "扁担长，板凳宽，`spread()`or`gather()`，
+           傻傻分不清，&#x1F632;"),
+    answer("`unite()`是`seperate()`的反向操作。", correct = TRUE),
+    answer("`unnest()`是`nest()`的反向操作。", 
+           message = "`nest()`+`purr::map()`会带来异常强大的操作，
+                      在下一讲中再重点讲解！", 
+           correct = TRUE),
+    answer("`unnest_longer()`、`unnest_wider()`、`unnest_auto()`和`hoist()`可
+           用来处理深度嵌套的列表数据。", correct = TRUE),
+    correct = "漂亮！记住`tidyr`包中的这些 **powerful** &#x1F4AA; 的函数！", 
+    incorrect = "手快但答错啦，请重试！",
+    allow_retry = TRUE, 
+    random_answer_order = TRUE
+  ),
+  
+  question("2.4 `tidyr`包中提供的对数据集中显性缺失值`NA`的处理函数包括：",
+    answer("`drop_na()`", correct = TRUE),
+    answer("`fill()`", correct = TRUE),
+    answer("`replace_na()`", correct = TRUE),
+    answer("`complete()`",  
+           message = "`complete()`反而会在数据集中增加显性缺失值`NA`。"),
+    correct = paste0(random_praise_cn(), 
+                     "尽管我们上课时由于时间关系跳过讲，但这些函数
+                     还是值得/需要同学们花点时间了解掌握滴。"), 
+    incorrect = paste0(random_encouragement_cn(), "请查看相关函数的帮助文档。"),
+    allow_retry = TRUE,
+    random_answer_order = TRUE
+  ),
+  caption = "**不定项选择题**"
+)
+
+```
+
+
+## `r emo::ji("woman_technologist")`编程练习
+
+
+### 数据介绍
+
+1. 本次编程实操练习的目的在于综合运用课程前面几讲学过的内容，导入 IPO 数据，
+   对数据进行处理并通过绘图进行探索性分析（已帮同学们从 Wind 下载所需数据）。
+
+2. 两份数据出处及说明如下：
+    
+    - `ipos_profile.csv` 数据来自 “Wind>股票>沪深股市专题统计>一级市场>IPO>新股
+        发行资料”，招股日期为 2006/01/01-2019/09/30，提取数据并导出到 Excel后，
+        在Excel中打开另存为csv格式文件（由于`read_csv()`命令可直接打开压缩文档，
+        为了减小qfwr包的大小，我还把它压缩为ipos_profile.zip文档）
+    
+    - `ipos_rets.xlsx` 数据来自 “Wind>股票>沪深股市专题统计>一级市场>IPO>新股
+        上市后市场表现”，日期为 2006/01/01-2019/10/13，提取数据并导出到 Excel
+
+3. 两份IPO相关数据都放在 `qfwr` 包安装目录下的 `exdata` 文件夹中，可用如下代码得到
+   两份文档的具体路径：
+
+    ```{r, echo=TRUE}
+    system.file("extdata", "ipos_profile.zip", package = "qfwr")
+    system.file("extdata", "ipos_rets.xlsx", package = "qfwr")
+    ```
+
+4. **务必根据文件路径到上述位置中逐一双击打开两份文档，并在 Excel 中大致浏览
+   数据字段和样本数，对原始数据有个初步感觉。**
+
+
+### EX01
+
+#### 练习1. 读入并处理 `ipos_profile.csv`
+
+<br>同学们通过Excel浏览数据 `ipos_profile.csv` 后不难看到：
+
+- `ipos_profile.csv` 中含有 67 个变量
+- 第1-2行为中文变量名
+- 最后2行是关于数据来源的注释。
+
+想直接通过 `read_csv()` 函数一步完成选定最终所需变量、重命名变量、选择样本行并
+完成变量类型转换等任务比较困难，这还会导致代码较长且难以理解。
+
+基本思路调整为：
+**先将 `ipos_profile.csv` 文档以字符形式全部读入，然后再进行进一步的处理。**
+——同学们就先按这个基本思路来处理数据，不要即兴发挥啦。`r emo::ji("stuck_out_tongue_winking_eye")`
+
+###
+
+#### >> 1.1 以字符形式读入全部内容
+
+```{r ex1-1, exercise=TRUE, exercise.lines=22}
+# 1. 加载tidyverse
+library(tidyverse)
+
+# 2. 得到 ipos_profile.csv 的具体路径
+profile_path <- system.file("extdata", "ipos_profile.zip", package = "qfwr")
+
+# 3. 以字符形式读入全部内容，代码模板如下：
+ipos_profile <- read_csv(
+  ____,                # 文件路径
+  col_names = FALSE,   # 把前两行的复合变量名也当成数据读进来
+  col_types = cols(.default = ____)
+  # 若读入错误，则可能还需要设置 locale 参数的 encoding 取值
+)
+
+# 4. ipos_profile 数据一瞥
+glimpse(ipos_profile)
+
+# x. 通常是不需要以下这个步骤，在此仅仅为了方便编写leanr练习
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+write_rds(ipos_profile, file = file.path(dp, "ipos_profile.rds"))
+```
+
+```{r ex1-1-solution}
+# 1. 加载tidyverse
+library(tidyverse)
+# 2. 得到 ipos_profile.csv 的具体路径
+profile_path <- system.file("extdata", "ipos_profile.zip", package = "qfwr")
+# 3. 以字符形式读入全部内容，代码模板如下：
+ipos_profile <- read_csv(
+  profile_path,        # 文件路径
+  col_names = FALSE,   # 把前两行的复合变量名也当成数据读进来
+  col_types = cols(.default = col_character())
+  # 若读入错误，则可能还需要设置 locale 参数的 encoding 取值
+)
+```
+
+```{r ex1-1-check}
+udf_msg <- "数据集ipos_profile不存在！"
+inc_msg <- "你确定代码模板中你填写的内容符合要求？"
+ex() %>% 
+  check_object("ipos_profile", undefined_msg = udf_msg, append = FALSE) %>% 
+  check_equal(eq_condition = "equal", incorrect_msg = inc_msg, append = FALSE)
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+### 
+
+#### >> 1.2 逐步进行处理
+
+```{r ex1-2, exercise=TRUE, exercise.lines=32}
+# 0. 先将之前存盘的ipos_profile.rds读入——通常不需要这一步骤
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_profile <- read_rds(file.path(dp, "ipos_profile.rds"))
+
+# 1. 使用 %>% 分三步完成对数据的处理工作：
+#           选择变量 -> 筛选样本 -> 变量类型转换
+# 2. 代码模板如下：
+ipos_profile_sml <- ipos_profile %>%
+  ____( # 选出并重命名需要的变量
+    stk_cd = X1,              # 代码
+    stk_nm = ____,           # 名称
+    ann_date = ____,          # 招股日期
+    on_date = ____,           # 网上发行日期
+    list_date = ____,         # 上市日期
+    list_board = ____,        # 上市板
+    issue_method = ____,      # 发行方式
+    underwriter = ____,       # 主承销商
+    csrc_ind = ____,          # 证监会行业(2012版)
+    wind_ind = ____           # Wind行业
+  ) %>%
+  slice(-c(1, 2, ____, ____)) %>%    # 删除第1-2行和最后两行
+  ____     # 对全部字符变量进行类型转换，提示：type_*()函数
+
+# 3. 浏览数据处理结果
+View(ipos_profile_sml)
+glimpse(ipos_profile_sml)
+
+# x. 通常是不需要以下这个步骤，在此仅仅为了方便编写leanr练习
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+write_rds(ipos_profile_sml, file = file.path(dp, "ipos_profile_sml.rds"))
+```
+
+```{r ex1-2-solution}
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_profile <- read_rds(file.path(dp, "ipos_profile.rds"))
+
+ipos_profile_sml <- ipos_profile %>%
+  select( # 选出并重命名需要的变量
+    stk_cd = X1,            # 代码
+    stk_nm = X2,            # 名称
+    ann_date = X4,          # 招股日期
+    on_date = X5,           # 网上发行日期
+    list_date = X6,         # 上市日期
+    list_board = X7,        # 上市板
+    issue_method = X49,     # 发行方式
+    underwriter = X51,      # 主承销商
+    csrc_ind = X63,         # 证监会行业(2012版)
+    wind_ind = X65          # Wind行业
+  ) %>%
+  slice(-c(1, 2, 2413, 2414)) %>%    # 删除第1-2行和最后两行
+  type_convert()            # 对全部字符变量进行类型转换
+```
+
+```{r ex1-2-check}
+udf_msg <- "数据集ipos_profile_sml不存在！"
+inc_msg <- "你确定代码模板中你填写的内容符合要求？"
+ex() %>% 
+  check_object("ipos_profile_sml", undefined_msg = udf_msg, append = FALSE) %>% 
+  check_equal(eq_condition = "equal", incorrect_msg = inc_msg)
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### EX02
+
+#### 练习2. 读入并处理 `ipos_rets.xlsx`
+
+<br>在此我们使用 **`readxl`包** 来读入 .xlsx 或 .xls 格式的文档，基本的套路还是和前一练习类似，但同学们需要查看下所用函数的具体参数
+设置（`?read_excel`）。
+
+- 参数 `col_types` 的设置和 `readr` 包的同名参数有所不同
+- 没有 `locale` 参数（更省事，`r emo::ji("beaming_face_with_smiling_eyes")`）
+
+在本例中我们只需正确设定参数 `col_names` 和数据单元格区域参数 `range`，
+变量类型读入基本正确（原 C 列的变量 “上市日期” 被转为 `dttm` 类型，但这对我们
+后续分析的影响并不大，也可以通过`lubridate::as_date()` 转回 `date` 类型）。
+
+### 
+
+#### >> 2.1 直接读入文档内容
+
+```{r ex2-1, exercise = TRUE, exercise.lines = 24}
+# 1. (安装并)加载 readxl 包
+# install.packages("readxl")
+library(____)
+
+# 2. 得到 ipos_rets.xlsx 的具体路径
+#    注意命令执行后的问题警示，由于 col_names=FALSE，read_excel()提供的
+#    默认变量名为 ...1，...2 ……
+rets_path <- system.file("extdata", "ipos_rets.xlsx", package = "qfwr")
+
+# 3. 读入文档内容
+ipos_rets <- read_excel(
+  ____,               # 文档路径
+  col_names = FALSE,  # 还是不要将中文变量名读入，方便处理
+  range = ____        # 记得不要将前两行变量名读进来
+)
+
+# 4. 一瞥读入的数据集
+glimpse(ipos_rets)
+
+# x. 通常是不需要以下这个步骤，在此仅仅为了方便编写leanr练习
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+write_rds(ipos_rets, file = file.path(dp, "ipos_rets.rds"))
+```
+
+```{r ex2-1-solution}
+library(readxl)
+rets_path <- system.file("extdata", "ipos_rets.xlsx", package = "qfwr")
+ipos_rets <- read_excel(
+  rets_path,           # 文档路径
+  col_names = FALSE,   # 还是不要将中文变量名读入，更方便自动判断数据类型
+  range = "A3:AV2405"  # 也可用 cellranger::cell_rows(3:2405)
+)
+```
+
+```{r ex2-1-check}
+udf_msg <- "数据集ipos_rets不存在！"
+inc_msg <- "你确定代码模板中你填写的内容符合要求？特别是`range`参数。"
+ex() %>% 
+  check_object("ipos_rets", undefined_msg = udf_msg, append = FALSE) %>% 
+  check_equal(eq_condition = "equal", incorrect_msg = inc_msg, append = FALSE)
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+### 
+
+#### >> 2.2 逐步进行处理
+
+```{r ex2-2, exercise=TRUE, exercise.lines=25}
+# 0. 先将之前存盘的ipos_rets.rds读入——通常不需要这一步骤
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_rets <- read_rds(file.path(dp, "ipos_rets.rds"))
+
+# 1. (对照原Excel文档)选择(并重命名)所需的变量
+#    代码模板如下：
+ipos_rets_sml <- ipos_rets %>%
+  ____(
+    stk_cd = ____,          # 代码
+    ipo_price = ____,       # 发行价格
+    int_return = ____,      # 上市首日涨跌幅(%)
+    int_turnover = ____,    # 上市首日换手率(%)
+    on_lottery = ____,      # 网上申购中签率(%)
+    off_lottery = ____      # 网下申购中签率(%)
+  )
+
+# 2. 浏览并一瞥数据处理结果
+View(ipos_rets_sml)
+glimpse(ipos_rets_sml)
+
+# x. 通常是不需要以下这个步骤，在此仅仅为了方便编写leanr练习
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+write_rds(ipos_rets_sml, file = file.path(dp, "ipos_rets_sml.rds"))
+```
+
+```{r ex2-2-solution}
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_rets <- read_rds(file.path(dp, "ipos_rets.rds"))
+
+ipos_rets_sml <- ipos_rets %>%
+  select(
+    stk_cd = ...1,           # 代码
+    ipo_price = ...6,        # 发行价格
+    int_return = ...10,      # 上市首日涨跌幅(%)
+    int_turnover = ...11,    # 上市首日换手率(%)
+    on_lottery = ...41,      # 网上申购中签率(%)
+    off_lottery = ...42      # 网下申购中签率(%)
+  )
+```
+
+```{r ex2-2-check}
+udf_msg <- "数据集ipos_rets_sml不存在！"
+inc_msg <- "你确定代码模板中你填写的内容符合要求？"
+ex() %>% 
+  check_object("ipos_rets_sml", undefined_msg = udf_msg, append = FALSE) %>% 
+  check_equal(eq_condition = "equal", incorrect_msg = inc_msg)
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### EX03
+
+#### 练习3. 合并数据集
+
+<br>基于键变量 “`stk_cd`(股票代码)” 将数据集 `ipos_profile_sml` 和 `ipos_rets_sml`
+合并式连接起来。
+
+```{r ex3, exercise = TRUE, exercise.lines = 20}
+# 0. 先将之前存盘的两个数据集读入——通常不需要这一步骤
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_profile_sml <- read_rds(file.path(dp, "ipos_profile_sml.rds"))
+ipos_rets_sml <- read_rds(file.path(dp, "ipos_rets_sml.rds"))
+
+# 1. 合并式连接两个数据集，**仅**保留在两个数据集中都出现的样本
+#    代码模板如下：
+ipos <- ipos_profile_sml %>%
+  ____(____, by = ____)
+
+# 3.2 查看合并后的数据
+ipos %>% 
+  select(-wind_ind) %>% 
+  DT::datatable(options = list(pageLength = 5, scrollX = TRUE))
+
+# x. 通常是不需要以下这个步骤，在此仅仅为了方便编写leanr练习
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+write_rds(ipos, file = file.path(dp, "ipos.rds"))
+```
+
+```{r ex3-solution}
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos_profile_sml <- read_rds(file.path(dp, "ipos_profile_sml.rds"))
+ipos_rets_sml <- read_rds(file.path(dp, "ipos_rets_sml.rds"))
+
+ipos <- ipos_profile_sml %>%
+  inner_join(ipos_rets_sml, by = "stk_cd")
+```
+
+```{r ex3-check}
+ex() %>% check_correct(
+  check_object(., "ipos") %>%
+    check_equal(eq_condition = "equal", 
+                incorrect_msg = "你确定代码模板中你填写的内容符合要求？", 
+                append = FALSE),
+  check_function(., "inner_join", 
+    not_called_msg = "题意要求仅保留在两个数据集中都出现的样本，应该用哪个_join()呢？", append = FALSE)
+)
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### EX04
+
+#### 练习4. 理解“首日收益率”的时序变化
+
+<br>在合并数据集 `ipos` 的基础上，我们将利用可视化的方法对变量以及变量之间可能存在的
+关系进行探索性分析。
+
+```{r ex4, exercise = TRUE, exercise.lines = 25}
+# 0. 先将之前存盘的ipos数据集读入——通常不需要这一步骤
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos <- read_rds(file.path(dp, "ipos.rds"))
+
+# 1. 作IPO“首日收益率”的时序变化的散点图
+#    代码模板如下：
+ipos %>% ggplot(aes(x = list_date, y = ____)) +
+  ____(
+    aes(color = ____),  # 分上市板设置不同颜色
+    ____ = 1/5    # 散点可能出现重叠, 设置透明度
+  ) +
+  labs(x = "Listing date", y = "Initial Returns (%)", color = NULL) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(legend.position = "bottom")
+
+# 2. 我国IPOs “首日收益率” 的时序变化具有哪些典型特征？认真观察并将
+#    你的观察结果分若干点写在下面阿拉伯数字之后，不少于100字
+comments <- '  # 注意不要删除这个单引号
+  1. 
+  2. 
+  3. 
+  4. 
+' # 注意不要删除这个单引号
+```
+
+```{r ex4-solution}
+dp <- system.file("tutorials", "L06", "data", package = "qfwr")
+ipos <- read_rds(file.path(dp, "ipos.rds"))
+
+ipos %>% ggplot(aes(x = list_date, y = int_return)) +
+  geom_point(
+    aes(color = list_board),  # 分上市板设置不同颜色
+    alpha = 1/5  # 散点可能出现重叠, 设置透明度
+  ) +
+  labs(x = "Listing date", y = "Initial Returns (%)", color = NULL) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(legend.position = "bottom")
+
+comments <- "1.2.3.4."
+```
+
+```{r ex4-check}
+ex() %>% {
+  check_function(., "aes", index = 1) %>% 
+    check_arg("y") %>% check_equal(eval = FALSE)
+  check_function(., "aes", index = 2) %>% 
+    check_arg("color") %>% 
+    check_equal(eval = FALSE, append = FALSE, 
+                incorrect_msg  = "上市板的变量名是什么？")
+  check_function(., "geom_point") %>% 
+    check_arg("alpha", append = FALSE, 
+              arg_not_specified_msg = "设置透明度参数是哪个？")
+  check_object(., "comments", append = FALSE, 
+               undefined_msg = "不要把comments变量给删除啦！") %>%
+    check_equal(eq_fun = function(x, y) nchar(x) > 120, 
+                incorrect_msg = "关于IPO首日收益率变化特征的描述文字字数太少。", 
+                append = FALSE)
+}
+
+success_msg(random_praise_cn(code = TRUE))
+```
+
+
+### EX05
+
+#### 练习5. 从头来过
+
+<br>前面这些代码练习同学们都是在老师给出（限定性）模板的基础上进行，能通过代码
+检查并不就意味着同学们已经掌握R数据处理的基本流程和核心函数。同学们应该再回过头
+读下之前完成的代码，然后用如下命令调出几乎完全空白的 `.Rmd` 文档，看是否能独立 / 独力完成相应的研究任务，甚至找到更好的实现方式和代码。加油！`r emo::ji("muscle")`
+<span style='color: red'>［同学们自行完成，此文档不用提交至 坚果云收件箱`r emo::ji("postbox")` 。］</span>
+
+```{r, eval=FALSE, echo=TRUE}
+qfwr::qfwr_lab("L06")
+```
+
+<br>
+
+## `r emo::ji("raising_hand_woman")`提交练习答案
+
+#### 恭喜同学们，完成第六讲课后练习啦！`r emo::ji("clinking_glasses")` <br>
+
+```{r ui, echo=FALSE}
+qfwr:::submission_ui(cid = "e99a5dba090043d6bb82f4372cec3136")
+```
+
+```{r context = "server"}
+qfwr:::submission_server()
+```
+
