@@ -1,0 +1,337 @@
+---
+title: "L07 上机练习"
+author: "我是谁？"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+### 说明
+
+1. 本次编程实操练习为 “L07 迭代” 一讲的配套课后练习。
+
+    + 在 `qfwr` 包 `extdata/L07_ex_data` 文件夹下有 64 个 csv 文档（我有意删去部分文档，只留下 64 个），数据内容为创业板公司 IPO 时网下询价机构的申报信息，手工收集自《××××首次公开发行股票并在创业板上市发行公告》
+        - csv文档名的前 6 个数字即是 IPO 公司的股票代码
+        
+        - 每个文档包含的 5 个字段如下：
+        
+          |申报价格|申报量|累计申报量|累计申报倍数|对应摊薄市盈率|
+          |--------|------|----------|------------|--------------|
+          |pbid    |qbid  |cum_qbid  |cum_fbid    |pe            |
+            
+        - csv 文档中只有申报数据，并未包含字段名
+        
+    + 在 `qfwr` 包 `extdata/L07_ex_data` 文件夹下还有个 \_readme\_.md 文档，同学们可在控制台键入如下代码浏览其内容：
+    
+      ```r
+      file.edit(
+        system.file("extdata", "L07_ex_data", "_readme_.md", package = "qfwr"),
+        fileEncoding = "UTF-8"
+      )
+      ```
+
+2. 尽管 `readr` 包 `v2.0.0` 之后直接支持读入并合并一个文件夹下多个同质的纯文本文档（代码如下），但我希望同学们不要直接走捷径，而是能循序渐进完成以下练习`#1-#3`——这有助于你们加深对本讲内容的理解和掌握。
+
+    ```{r, eval=TRUE}
+    suppressMessages(library(tidyverse))
+    path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+    csv_files <- list.files(path, pattern = "*\\.csv$")
+    csv_files
+    out_tb0 <- 
+      file.path(path, csv_files) %>% 
+      readr::read_csv(
+        col_names = c("pbid", "qbid", "cum_qbid", "cum_fbid", "pe"), 
+        id = "stkcd"
+      ) %>% 
+      filter(!is.na(pbid)) %>%                 # 删除空行
+      mutate(stkcd = str_sub(stkcd, -11, -6))  # 原 id 列包含 path
+    out_tb0
+    # View(out_tb0)
+    ```
+
+
+## 0 设置
+
+### 0.1 设置并导入 R 包
+
+```{r setup, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# 导入研究中用到的R包
+library(tidyverse)
+```
+
+
+### 练习1：`for` 循环
+
+#### 任务说明 &#x1F9FE;：
+
+1. 将 `L07_ex_data` 文件夹下的 64 个 csv 文档逐一读入并纵向合并为一个数据集
+
+2. 要求使用 `for` 循环来完成逐一读入 csv 文件的任务
+
+#### 1.1 完成对单个文件的读入与处理
+
+“千里之行始于足下”！首先，我们需要完成对单个文件的读入与处理，该步骤主要运用本课程第 5 讲和第 4 讲的知识。
+
+```{r ex1-1, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将本代码块选项 eval=FALSE 修改为 eval=TRUE 
+# 可在控制台键入 qfwr::qfwr_key("L07", "ex1-1") 查看参考答案
+
+# 1-1.1：设定文件路径、列示文件并选择一只“样本股”
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+list.files(path)
+csv_file <- "300002a.csv"
+
+# 1-1.2: 用 readr::read_csv() 来读入 csv_file，并设定 col_types参数
+out <- read_csv(
+  file.path(path, csv_file),   # 连接路径和文件名
+  col_names = <...>,  # TRUE / FALSE
+  col_types = cols(
+    X1 = col_double(),
+    X2 = col_number(),
+    X3 = col_number(),
+    X4 = col_double(),
+    X5 = col_double()
+  )
+)
+out
+
+View(out)
+
+# 1-1.2: 字段重命名（想想还可以在哪个步骤中直接完成字段重命名任务）
+out <- <...> %>% 
+  <...>(
+    pbid = X1,
+    qbid = X2,
+    cum_qbid = X3,
+    cum_fbid = X4,
+    pe = X5
+  )
+out
+
+# 1-1.3: 事后发现有些文档的最后有些空行，补充 1-1.3，删除空行
+out <- <...> %>% <...>(!is.na(pbid))
+
+# 1-1.4: 查看结果是否正确
+
+out %>% View()
+
+```
+
+#### 1.2 自定义函数
+
+将前一步骤完成的工作提取为一个函数，方便在 `for` 循环体内调用。该函数为 `read_one_csv()` 函数，其输入为文件名，输出为 tibble 对象。
+
+```{r ex1-2, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将代码块选项 eval=FALSE 修改为 eval=TRUE
+# 可在控制台键入 qfwr::qfwr_key("L07", "ex1-2") 查看参考答案
+
+# 获取文件路径，该步骤无需放入函数体中
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+
+# 定义函数 read_one_csv()
+read_one_csv <- function(csv_file) {
+  # s0: 在控制台上输出当前循环读到哪个文档
+  cat("... read in", csv_file, "now ...\n\n")
+  
+  # s1: 用 readr::read_csv() 来读入 csv_file，并设定 col_types 参数
+  out <- <...>
+  
+  # s2: 字段重命名（想想还可以在哪个步骤中直接完成字段重命名任务）
+  out <- <...>
+  
+  # s3: 事后发现有些文档的最后有些空行，补充s3，删除之
+  out %>% <...>
+    
+}
+
+<...>("300002a.csv") %>% View()  # 验证 read_one_csv() 是否工作正常
+
+```
+
+#### 1.3 `for` 循环读入 csv 文档并完成合并
+
+接下来的任务就简单多了：
+
+- 将满足特定模式的文件名存入字符向量中
+
+- 用 `for` 循环调用刚定义的 `read_one_csv()` 逐个读入 csv 文档并将结果存入列表
+
+- 将存储在列表中的 64 个 tibble 纵向合并
+
+```{r ex1-3, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将代码块选项 eval=FALSE 修改为 eval=TRUE
+# 可在控制台键入 qfwr::qfwr_key("L07", "ex1-3") 查看参考答案
+
+# 1-3.1：将 path 路径下满足特定模式的文件名存入字符向量
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+csv_files <- list.files(path, pattern = <...>)  # 记得只包含 .csv 类型的文件
+csv_files %>% head(5)   # 看看 csv_files 向量的内容
+
+# 1-3.2：用 for 循环调用刚定义的 read_one_csv() 逐个读入 csv 文档并将结果存入列表
+#        三个步骤：output >> sequence >> body
+
+out_list <- <...>   # 用列表来存储读入的csv数据
+names(out_list) <- str_sub(csv_files, 1, 6)   # 用 IPO 公司代码（6位数字）给
+                                              # out_list 各元素命名
+
+for (i in <...>) {  # for 循环
+  <...>
+}
+
+View(out_list)   # 看下最终结果如何
+
+# 1-3.3：将 out_list 列表中的64个 tibble 纵向合并，同时生成新的字段 stkcd，
+#        用来标识具体是哪家 IPO 公司的网下申报数据
+#        dplyr 包中竟然有个函数可一步完成，找到它！
+out_tb <- out_list %>% <...>
+  
+View(out_tb)
+
+# 噢耶！成功！
+
+```
+
+
+### 练习2：管道操作符 + 函数式编程
+
+#### 任务说明：
+
+1. 用 `%>%` 重写 `read_one_csv()` 函数
+
+2. 用函数式编程方法来替代练习#1中的 `for` 循环
+
+#### 2.1 用 `%>%` 重写 `read_one_csv()` 函数
+
+之前的 `read_one_csv()` 函数体感觉不够紧凑，在此我们用管道操作符 `%>%` 将其改写为函数 `read_one_csv2()`。
+
+```{r ex2-1, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将代码块选项 eval=FALSE 修改为 eval=TRUE
+# 可在控制台中使用 qfwr_key("L07", "ex2-1") 查看参考答案
+
+read_one_csv2 <- function(csv_file) {
+  # s0: 在屏幕输出输出当前循环读到哪个文档
+  cat("... read in", csv_file, "now ...\n\n")  
+  
+  # s1: 读入并操作 csv 文档
+    <...> %>% 
+      <...> %>% 
+      <...> %>% 
+      <...> %>% 
+      ...
+}
+
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+read_one_csv2("300002a.csv") %>% View()  # 验证 read_one_csv2() 是否工作正常
+
+```
+
+#### 2.2 用函数式编程方法来替代练习#1中的 `for` 循环
+
+在练习#1中我们在 `for` 循环中调用 `read_one_csv()` 函数完成对 64 个 csv 文档的导入，在本练习中我们用函数式编程的方法来完成相同的任务。
+
+```{r ex2-2, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将代码块选项 eval=FALSE 修改为 eval=TRUE
+# 可在控制台中使用 qfwr_key("L07", "ex2-2") 查看参考答案
+
+# 2-2.1: 首先还是将满足条件的文件名存入字符向量
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+csv_files <- list.files(path, pattern = "*\\.csv$")
+
+# 2-2.2：应用 purrr 包中的函数读入 csv 文档，得到数据集列表
+out_list2 <- csv_files %>% <...>
+
+# 2-2.3：将 out_list2 列表中的64个数据集纵向合并，同时用字段 stkcd 标识
+#        具体是哪家 IPO 公司，但需先用 csv 文件名给 out_list2 命名，purrr 包
+#        中有个函数可完成这一任务，找到它
+out_tb2 <- out_list2 %>% 
+  <...> %>%   # 此步给 out_list2 命名
+  <...>
+
+# 看看是否OK？
+out_tb2 %>% View()
+
+# 成功！
+
+```
+
+
+### 练习3：列表列
+
+#### 任务说明：
+
+1. 用列表列的方法完成合并 64 个 csv 文档的任务
+
+#### 3.1 用列表列的方法合并 64 个 csv 文档
+
+```{r ex3-1, eval=FALSE}
+# 将 <...> 替换为合适的代码，其余代码勿动
+# 修改后点击代码块右上侧的绿色三角按键或使用快捷键 Ctrl+Shift+Enter 执行代码块
+# 若执行无误，将代码块选项 eval=FALSE 修改为 eval=TRUE
+# 可在控制台中使用 qfwr_key("L07", "ex3-1") 查看参考答案
+
+# 3-1.1: 首先将符合条件的文件名存为 tibble 对象的 stkcd 列
+path <- system.file("extdata", "L07_ex_data", package = "qfwr")
+out_tb3 <- tibble(stkcd = <...>)
+
+# 3-1.2: 将 csv 文档读入为列表列 data
+out_tb3 <- out_tb3 %>% 
+  mutate(data = <...>)
+View(out_tb3)
+
+# 3-1.3：修改 stkcd 变量并解套 data 列表列
+out_tb3 <- out_tb3 %>% 
+  mutate(stkcd = <...>) %>% 
+  <...>
+
+# 查看结果是否OK？
+out_tb3
+View(out_tb3)
+
+# 成功！
+
+```
+
+#### 3.2 检查下最终得到的 out_tb* 是否相同
+
+完成上述练习#1-#3后记得将下面代码块中的`eval=FALSE`修改为`eval=TRUE`，重新运行代码，看你能否得到一个大大的 `yeah`？！
+
+```{r, echo=FALSE, eval=FALSE}
+{
+  stopifnot(
+    identical(out_tb, out_tb2),
+    identical(out_tb[], out_tb3)  # 和 out_tb3 比，out_tb 还额外包含
+                                  # "spec_tbl_df"类和"spec"属性，需要
+                                  # 用[]选择子集操作以去除该属性
+  )
+  
+  cat(
+        "                    \n",
+        "     /\\  /\\       \n",
+        "     \\ \\/ /       \n",
+        "     /~~\\/\\/\\    \n",
+        "     \\ ~~\\/\\/    \n",
+        "      \\    /       \n",
+        "                    \n",
+        "      成功啦！      \n"
+  )
+}
+
+```
+
+
+尽管上述三个练习都能得到相同的结果，但复杂程度有所不同，你最喜欢 &#x1F60D; 哪种操作呢？
+

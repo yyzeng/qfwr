@@ -50,7 +50,8 @@ submission_ui <- function(cid = NULL) {
   href_jgy <- paste0("https://workspace.jianguoyun.com/inbox/collect/", 
                      cid, "/submit")
   shiny::div(
-    shiny::h4("当你完成本讲的练习之后，请按照以下三个步骤的操作完成作业的提交："), 
+    shiny::br(),
+    shiny::h4("当你完成前面的练习之后，请按照以下三个步骤提交答案："), 
     shiny::br(), 
     shiny::tags$ol(
       shiny::tags$li("点击按钮", 

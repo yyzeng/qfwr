@@ -1,0 +1,170 @@
+---
+title: "L07 迭代"
+author: "曾永艺"
+date: "2021年11月15日"
+tutorial:
+  id: qfwr-L07
+  version: 0.1.03
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: false
+    df_print: "tibble"
+description: >
+  这是厦门大学管理学院财务学系 **“量化金融与金融编程”** 
+  课程 _“第7讲 迭代”_ 的配套练习。
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(testwhat)
+# library(gradethis)
+library(tidyverse)
+library(qfwr)
+
+# options(tibble.print_max = 6, tibble.print_min = 4)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(
+  # exercise.cap = NULL,
+  # exercise.eval = FALSE,
+  exercise.timelimit = 60, #<<
+  # exercise.lines = NULL,
+  exercise.blanks = FALSE, #<<
+  exercise.checker = testwhat::testwhat_learnr, #<<
+  # exercise.error.check.code = NULL,
+  # exercise.completion = TRUE,
+  # exercise.diagnostics = TRUE,
+  # exercise.startover = TRUE,
+  exercise.reveal_solution = FALSE #<<
+)
+```
+
+
+## `r emo::ji("book")` 基础概念题
+
+### 
+
+```{r quiz}
+quiz(
+  question("1 以下关于 `for` 循环说法正确的有：<span style='color: red'>（&#x1F4A3; 注意此题答错不允许 Try Again &#x1F4A3;）</span>",
+    answer("`for` 循环通常由三部分组成：1. 设置输出、2. 循环序列、3. 循环体。", 
+           correct = TRUE),
+    answer('当事前无法确定所需循环的次数时，我们无法使用 `for` 循环，而应改用 `while` 或 `repeat` 循环。', correct = TRUE),
+    answer('相比 `for (x in xs)` 和 `for (i in seq_along(xs))` ，`for (nm in names(xs))`是最通用的 `for` 循环。', correct = FALSE),
+    answer('当无法事前确定输出长度时，最好在设置输出时采用更复杂的数据结构，等完成循环之后再作变换，从而得到满足要求的输出。', correct = TRUE),
+    answer('在 R 中可运用函数式编程工具和函数，从而减少对 `for` 循环的依赖。', correct = TRUE),
+    correct = random_praise_cn(),
+    incorrect = "错误！记得重温下讲义相应内容。", 
+    # allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("2 以下关于 R 中函数式编程说法正确的有：",
+    answer('R 语言的核心是一种函数式编程语言，函数本身既可直接赋值给变量名，还可作为另一个函数的一个参数，甚至通过函数直接修改另一个函数的行为。', correct = TRUE),
+    answer('所谓的泛函 “functional” 就是指一类以函数作为参数，返回数据对象的函数，往往用来替代 `for` 循环完成数据运算，如 R 基础包中的 `apply` 族函数。', correct = TRUE),
+    answer('用函数式编程的方式来替代 `for` 循环，往往更加简洁，同时还支持用 `%>%` 链接起来一步步解决复杂问题。', correct = TRUE),
+    answer('相比 R 基础包中的 `apply` 族函数，`purrr` 包中的 `map` 族函数提供更加一致的接口，易学易用。', correct = TRUE),
+    correct = random_praise_cn(),
+    try_again = "错误！请重温下讲义相关内容，然后重新回答。",
+    allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("3 以下关于 `purrr` 包说法正确的有：",
+    answer('`purrr` 包中的 `map` 族函数大多以向量作为第1个参数，以函数作为第2个参数（支持快捷写法），并返回与输入向量等长的向量作为结果。', correct = TRUE), 
+    answer('`purrr` 包中的 `map_chr(.x, .f, ...)` 函数以向量 `.x` 作为第1个参数，以函数 `.f` 作为第2个参数（支持快捷写法），`...` 是传递给映射函数 `.f` 的额外参数，并返回与输入向量等长的字符向量。', correct = TRUE), 
+    answer('`map_if(.x, .p, .f, ...)` 函数对 `.x` 中断言函数 `.f` 取值为 `TRUE` 的元素依次执行 `.p` 的函数运算，返回列表对象。', correct = FALSE),
+    answer('`purrr` 包中的 `safely()`、`possibly()`、`quietly()`、`insistently()` 与 `negate()` 等函数以函数作为输入，并返回一个修改后的函数，即所谓的“函数运算符”。', correct = TRUE),
+    answer('`keep()`、`discard()`、`some()`、`detect()` 等函数以断言函数作为其第2个参数。', correct = TRUE),
+    correct = random_praise_cn(),
+    try_again = "错误！请重温讲义相关内容并在需要时参考函数的帮助文档，然后重新回答。",
+    post_message = "`purrr` 包是 tidyverse 中用来实现函数式编程的一个非常有用的 R 包 &#x1F4E6; ——熟悉它，掌握它，同学们用 R 进行数据操作的能力自然会更上层楼 &#x1F3D7;&#xFE0F;。", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  caption = "不定项选择题"
+)
+
+```
+  
+### 
+
+#### 已帮同学们载入 `tidyverse` 包并在以下代码窗口中列示出完成 不定项选择题4 所需的部分代码，请同学们完成交互式探索，并回答问题。
+
+```{r fc, exercise=TRUE, exercise.lines=6}
+models <- mtcars %>% 
+  split(.$cyl) %>% 
+  map(~ lm(mpg ~ wt, data = .))
+
+```
+
+```{r fc-hint}
+# 可通过按左上角的 Start Over 按钮来重置代码
+
+```
+
+```{r quiz-2}
+quiz(
+  question("4 以下哪些代码可从 `models` 对象中提取出三个回归模型的 R^2 ？",
+    answer('`models %>% map(summary) %>% map_dbl(function(x) x$r.squared)`', correct = TRUE),
+    answer('`models %>% map(summary) %>% map_dbl(~ .$r.squared)`', correct = TRUE),
+    answer('`models %>% map(summary) %>% map_dbl("r.squared")`', correct = TRUE),
+    answer('`models %>% map(summary) %>% map_dbl(8)`', correct = TRUE),
+    answer('`models %>% map_dbl(~ summary(.)[["r.squared"]])`', correct = TRUE),
+    answer('`models %>% map(broom::glance) %>% map_dbl("r.squared")`', correct = TRUE),
+    correct = random_praise_cn(), 
+    try_again = "错误！请逐一运行代码 &#x200D;&#x1F4BB;，一试便知！", 
+    post_message = "条条大路通罗马 &#x1F6E3;&#xFE0F;，但 **显然不是所有道路都值得追随！**", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("5 以下关于数据框对象的列表列（ *list-column* ）说法正确的有：",
+    answer('数据框对象只要求每列的长度（`length()`）相同，但每列可以是不同的类，因此支持列表列（即类型为 `list` 的列）。', correct = TRUE),
+    answer('我们可以在列表列的列表元素中存储各种复杂的数据（如回归模型结果列表或者一个数据框），并通过键变量或位置将它和其它变量自然绑定起来，如此更容易进行后续步骤的数据处理。', correct = TRUE),
+    answer('基于数据框列表列的数据处理流程通常包括三个核心步骤：1. 生成列表列；2. 处理列表列；3. 简化列表列。', correct = TRUE),
+    answer('我们通常在 `mutate()` 函数中结合 `map` 族函数对列表列进行操作，生成新的列表列或原子向量列。', correct = TRUE),
+    answer('`dplyr` 包中的函数 `nest()` 通过数据嵌套生成列表列，而 `unnest()` 则用来将列表列解嵌套为正常的数据列。', correct = FALSE, message = '想想 nest() / unnest() 在哪个 R 包中呢？'),
+    correct = random_praise_cn(), 
+    try_again = "错误！列表列是很重要的数据操作方法，请重温讲义相关内容并重新回答。", 
+    post_message = "在 R 中以数据框列表列的方式对数据进行处理是个非常强大且实用的功能——谁用谁知道！&#x1F60D;",
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  caption = ""
+)
+
+```
+
+<br>
+
+### `r emo::ji("raising_hand_woman")` 提交选择题答案
+
+```{r ui, echo=FALSE}
+qfwr:::submission_ui(cid = "25ba200d077e4e08b42f5ef861865740")
+```
+
+```{r context = "server"}
+qfwr:::submission_server()
+```
+
+
+## `r emo::ji("woman_technologist")` 编程练习
+
+接下来你可退出 `learnr` 练习并在 `RStudio` 的 Console 中键入如下命令调出本讲练习的 `RMarkdown` 文档（`L07-lab.Rmd`），根据提示完成上机实操练习。
+
+```
+qfwr::qfwr_lab("L07")
+
+```
+
+记得将打开的未命名的 .Rmd 文档保存至合适的目录下，并取名为 L07-lab.Rmd。<span style='color: red'>**此文档无需上传至坚果云。**</span>
+
