@@ -1,0 +1,237 @@
+---
+title: "L09 上机练习"
+author: "我是谁？"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+### 说明
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE  # 在最后 Knit 本文档前，记得将 eval 更改为 TRUE
+)
+```
+
+1. 本次编程实操练习为 “L09_字符串、因子和日期-时间”一讲的配套课后练习，目的
+   在于综合运用课程学过的内容，特别是第九讲中对字符串、因子和日期变量的处理；
+
+2. 我已用 L06 编程实操练习相似的流程和代码生成数据集 `ipos` 并将其包含在 `qfwr` 包中，
+   你可用 `data(ipos)` 将该数据集加载到内存中，然后用 `ipos` 直接调用该数据集
+   （当然你也可用 `View(ipos)` 来浏览数据，用`help(ipos)`来查看数据集的帮助文档）。
+
+
+## 练习1. 热身 `warming-up`
+
+若我们直接用以下 `ggplot2` 命令做柱状图，`x` 轴 _Listing board_ 的排列顺序并不太符合要求：
+
+```{r ex1-0, fig.asp=0.6, fig.align='center', out.width='80%', dpi=400}
+# 1-0.1 加载相关 R 包和 ipos 数据集
+library(tidyverse)
+library(lubridate)
+library(qfwr)
+data(ipos)
+
+ipos
+
+# 1-0.2 制图
+ipos %>% 
+  ggplot(aes(x = list_board)) +
+  geom_bar(fill = "darkgrey", width = 0.6) + 
+  labs(x = NULL, y = "num of IPOs")
+
+```
+
+我们希望从左到右的排序顺序为：主板->中小企业板->创业板->科创板，请用 `forcats` 包中的相应函数对字符变量 `list_board` 重新排序。
+
+```{r ex1-1, fig.asp=0.6, fig.align='center', out.width='80%', dpi=400}
+# 请先试着自主独立完成，如实在难以解决，...>
+# 可在控制台Console中键入 qfwr::qfwr_key("L09", "ex1-1") 查看参考答案
+
+# 1-1.1 调整因子次序并制图
+#       在以下代码的_____处填入合适的内容
+#       注：尽管 fct_*() 函数的第一个参数多为 f（因子向量），但它们多数也可直接
+#           作用于本例中的字符型向量 list_board
+ipos %>% 
+  _____ %>%   # 调整变量的因子次序，记得在 mutate() 中调用相应的 fct_*()
+  ggplot(aes(x = list_board)) +
+  geom_bar(fill = "darkgrey", width = 0.6) + 
+  labs(x = NULL, y = "num of IPOs")
+
+```
+
+
+## 练习2. 处理变量 `wind_ind` 并制图
+
+数据集 `ipos` 中的变量 `wind_ind` 为 Wind 划分的行业分类，其细分至四级，如
+“医疗保健--医疗保健设备与服务--医疗保健设备与用品--医疗保健用品”，但划分过细
+并不便于我们汇总统计和制图。在此，我们只需提取（保留）其第一级行业分类。
+
+```{r ex2, fig.asp=0.6, fig.align='center', out.width='80%', dpi=400}
+# 请先试着自主独立完成，如实在难以解决，...>
+# 可在控制台Console中键入 qfwr::qfwr_key("L09", "ex2") 查看参考答案
+
+# 2.1 先看看 wind_ind 的行业划分情况
+ipos %>%
+  count(wind_ind, sort = TRUE) %>%
+  View()
+
+# 2.2 提取（保留） wind_ind 的第一级行业分类并制图
+#     条条大路通罗马，但限制使用 mutate() + str_*() 的方法
+#     在以下代码中的<...>修改为恰当的内容
+ipos %>% 
+  mutate(wind_ind1 = str_<...>(wind_ind, "<...>")) %>% 
+  ggplot(aes(fct_<...>(wind_ind1))) +   # 按频率从高到低自左向右排序
+  geom_bar() +
+  labs(x = "Wind Industry Code", y = "num of IPOs")
+
+```
+
+
+## 练习3. 处理变量 `underwriter`
+
+在这个任务中，我们想统计主承销商在此期间承销家数的排名情况并作图，最终希望
+得到的示例图大致如下：
+
+```{r, eval=TRUE, echo=FALSE, fig.align='center', out.width='80%'}
+png_udwrt <- system.file("tutorials", "L09", "L09-lab", "udwrt.svg", package = "qfwr")
+knitr::include_graphics(png_udwrt)
+```
+
+但是，我们运行下列代码：
+
+```{r ex3-0}
+# 先用以下命令整体浏览下变量 underwriter 的取值及其分布情况
+ipos %>%
+  count(underwriter) %>%
+  arrange(desc(n)) %>% 
+  View()
+
+```
+
+不难发现 `underwriter` 变量存在以下三个主要问题：
+
+- 主承销商 `underwriter` 变量有点复杂，一只 IPO 可能存在多家主承销商，在
+  原数据集中用半角 `,` 分隔，最多的一只 IPO 竟有 5 家主承销商，并不满足 
+  tidy data 的要求。
+  
+- 主承销商全名有点长，不便列表与作图。我们希望用承销商常见的简称，如不用
+  “申万宏源证券承销保荐有限责任公司”，而用“申万宏源”。当然部分券商简称得手工
+  处理，如“中国国际金融股份有限公司”的通用简称应该为“中金公司”。
+  
+- 承销券商很多，在制作承销商 IPO 承销家数条形图时我们希望只显示承销家数排名靠前
+  的前十五大券商，而把其余券商汇总为“其它券商”，并显示在最底下。（样本期间，
+  券商存在合并重组更名等现象，在此暂不予考虑）。
+
+我们需要逐一处理上述问题。
+
+### 1. 将原主承销商字段 `underwriter` 拆解成多行
+
+```{r ex3-1}
+# 请先试着自主独立完成，如实在难以解决，...>
+# 可在控制台Console中键入 qfwr::qfwr_key("L09", "ex3-1") 查看参考答案
+
+# 3-1.1 拆解成多行，每行一个承销商，并存为新数据集 underwriters
+#       注：在关于 tidyr 包的 cheatsheet 中可找一个函数轻松实现！
+underwriters <- ipos %>% 
+  select(stk_cd, underwriter) %>%  # 只保留两个字段，避免繁乱
+  <...> %>% 
+  arrange(stk_cd)
+underwriters
+
+```
+
+
+### 2. 将承销商名字转换为恰当的简称，生成新变量 `undwrt`
+
+```{r ex3-2}
+# 请先试着自主独立完成，如实在难以解决，...>
+# 可在控制台Console中键入 qfwr::qfwr_key("L09", "ex3-2") 查看参考答案
+
+# 3-2.1 先统一提取变量 underwriter 的前四位字符作为承销商简称
+udw_tmp <- underwriters %>% 
+  mutate(undwrt = <...>)
+
+# 3-2.2 再看下 undwrt 变量的取值及其*倒序*频数分布情况
+udw_tmp %>% 
+  <...>(undwrt) %>% 
+  <...>(<...>) %>% # 也可在前一步骤中设定参数 sort = TRUE 从而跳过此步骤
+  View()
+
+# 3-2.3 手工调整更改几处明显不太恰当的券商简称，如：
+#       中国国际（中金公司）|中国银河（银河证券）|中国中投（中投证券）
+#       中国民族（民族证券）|太平洋证（太平洋证券）|新时代证（新时代证券）
+#       摩根士丹（摩根士丹利）| 长江巴黎（长江证券）
+udwrs <- udw_tmp %>%
+  mutate(
+    undwrt = <...>    # 要改这么多，代码不会短。一个一个改？Noop！
+                      # ?str_replace_all
+  )
+
+# 3-2.4 再看下 undwrt 变量的取值及其倒序频数分布情况
+udwrs %>%
+  count(undwrt) %>%
+  arrange(desc(n)) %>% 
+  View()
+
+```
+
+
+### 3. 统计每家承销商 `undwrt` 的IPO承销家数并作图
+
+```{r ex3-3, fig.asp=0.6, fig.align='center', out.width='80%', dpi=400}
+# 请先试着自主独立完成，如实在难以解决，...>
+# 可在控制台Console中键入 qfwr::qfwr_key("L09", "ex3-3") 查看参考答案
+
+# 3-3.1 计算主承销商承销家数
+#       计算方法如下：
+#       假如一只 IPO 只有1家主承销商，则给该主承销商 +1，有2家主承销商，则
+#       每家各 +1/2，以此类推。没整明白具体怎么算，那也别慌！我已经帮你们
+#       算好啦，:) 代码如下：
+undwrt_ipos <- udwrs %>% 
+  group_by(stk_cd) %>% 
+  mutate(ipo_share = 1/n()) %>% 
+  group_by(undwrt) %>% 
+  summarise(ipos = sum(ipo_share)) %>% 
+  arrange(desc(ipos))
+
+# 3-3.2 将承销家数处于15位之后的券商合并为“其它券商”组（记得设置权重 w 参数），
+#       重新按因子变量 undwrt 统计 IPO 承销家数，并作条形图（作图前记得调整
+#       变量 undwrt 的因子次序）
+undwrt_ipos %>% 
+  mutate(  # 将承销家数处于15位之后的券商合并为“其它券商”组
+    undwrt = <...>
+  ) %>% 
+  count(undwrt, wt = ipos) %>% 
+  mutate(  # 调整变量 undwrt 的因子次序，可能需要两次调整
+    <...>
+  ) %>%
+  ggplot(aes(x = n, y = undwrt)) +
+  geom_bar(stat = "identity") +
+  labs(x = "num of IPOs", y = "Underwriter")
+
+```
+
+
+## 练习4. 附加题
+
+同学们可试着模仿本讲讲义幻灯片36和幻灯片37的代码绘制 IPO 月度发行家数
+（基于网上发行日期 on_date 统计）的时间序列柱形图。
+
+```{r ex4, fig.asp=0.4, fig.align='center', out.width='80%', dpi=400}
+# 请尽量自主独立完成
+
+
+
+```
+
+累啦！不想再动脑，只想看参考答案！！&#x1F631; <br><br>
+\~\~\~\~ 那就键入 `qfwr::qfwr_key("L09", "ex4")` 吧。
+
+
+## 恭喜同学们，完成第九讲课后练习啦！&#x1F942; []\~(￣▽￣)\~*  &#x1F942;
+

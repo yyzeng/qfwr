@@ -1,0 +1,205 @@
+---
+title: "L09 字符串、因子和日期-时间"
+author: "曾永艺"
+date: "2021年11月29日"
+tutorial:
+  id: qfwr-L09
+  version: 0.1.04
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: "tibble"
+description: >
+  这是厦门大学管理学院财务学系 **“量化金融与金融编程”** 
+  课程 _“第9讲 字符串、因子和日期-时间”_ 的配套练习。
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(testwhat)
+# library(gradethis)
+library(tidyverse)
+library(qfwr)
+
+# options(tibble.print_max = 6, tibble.print_min = 4)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(
+  # exercise.cap = NULL,
+  # exercise.eval = FALSE,
+  exercise.timelimit = 60, #<<
+  # exercise.lines = NULL,
+  exercise.blanks = FALSE, #<<
+  exercise.checker = testwhat::testwhat_learnr, #<<
+  # exercise.error.check.code = NULL,
+  # exercise.completion = TRUE,
+  # exercise.diagnostics = TRUE,
+  # exercise.startover = TRUE,
+  exercise.reveal_solution = FALSE #<<
+)
+```
+
+
+## `r emo::ji("book")` 基础概念题
+
+### 
+
+```{r quiz-1}
+quiz(
+  question("1 `library(tidyverse)` 会加载 `tidyverse` 的核心包，其中包括：<span style='color: red'>（&#x1F4A3; 注意此题答错不允许 Try Again &#x1F4A3;）</span>",
+    answer("`readr` - `dplyr` - `ggplot2`", correct = TRUE),
+    answer("`tibble` - `tidyr`", correct = TRUE),
+    answer("`stringr`", correct = TRUE),
+    answer("`forcats`", correct = TRUE),
+    answer("`lubridate`", correct = FALSE, 
+           message = "`lubridate` 并非 `tidyverse` 的核心包，需要手动加载。"),
+    answer("`purrr`", correct = TRUE),
+    correct = "正确！", 
+    incorrect = "错误！`library(tidyverse)` 会自动加载 8 个核心 R 包。",
+    message = "尽管 R4DS 说需要手动加载，但 `stringr` 和 `forcats` 包目前已纳入 `tidyverse` 的核心包。",
+    # allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  caption = "不定项选择题"
+)
+  
+```
+
+### 
+
+#### 已帮同学们载入相关的 R 包，同学们可在以下代码练习窗口中完成交互式探索，并回答以下选择题。
+
+  ```{r, eval=FALSE, echo=TRUE}
+  library(tidyverse)
+  library(lubridate)
+  ```
+
+```{r ex0, exercise=TRUE, exercise.lines=6}
+# ?words
+```
+
+```{r quiz-2}
+quiz(  
+  question("2 关于 `stringr` 包内置数据集 `words` 说法正确的有：",
+    answer("`words` 数据集中单词倒数第2个字母为 `x` 的单词只有1个。", 
+           correct = TRUE),
+    answer("`words` 数据集中全部由辅音字母构成的单词（如 `by` ）只有6个。", 
+           correct = TRUE),
+    answer("在 `words` 数据集的单词中字母 `q` 后面总是跟着字母 `u`。", 
+           correct = TRUE),
+    answer("`words` 数据集中单词开头字母和结尾字母相同的单词共有32个。", 
+           correct = FALSE, message = "事实上，`words` 数据集中单词开头字母和结尾字母相同的单词共有36个，而非32个。"),
+    answer("`words` 数据集中存在含有 `z`、`e`、`n`、`g` 全部4个字母的单词。&#x1F601;", 
+           correct = TRUE),
+    answer("`words` 数据中以 `k` 字母开头的单词比 `k` 为第3个字母的单词多。",
+           correct = TRUE), 
+    correct = random_praise_cn(), 
+    try_again = "错误！请利用 `stringr` 包中的相关函数（如 `str_subset()`、`str_detect()`、`str_ends()` 等）及恰当的正则表达式对上述论断进行一一测试。",
+    post_message = "我相信你不是蒙对答案滴！&#x1F60E;",
+    allow_retry = TRUE,
+    random_answer_order = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("3 认真想想，下面哪些 `stringr` 包中的函数能直接用在 `dplyr::mutate()` 函数中生成新变量？",
+    answer('`str_length()`', correct = TRUE),
+    answer('`str_c()`', correct = TRUE),
+    answer('`str_sub()`', correct = TRUE),
+    answer('`str_trim()` 和 `str_squish()`', correct = TRUE),
+    answer('`str_detect()`', correct = TRUE),
+    answer('`str_starts()` 和 `str_ends()`', correct = TRUE),
+    answer('`str_subset()` 和 `str_which()`', 
+           message = "`str_subset()` 和 `str_which()` 并不一定返回和输入向量等长的向量，所以无法直接用在 `mutate()` 函数中。"),
+    answer('`str_count()`', correct = TRUE),
+    answer('`str_pad()` 和 `str_trunc()`', correct = TRUE),
+    answer('`str_replace()` 和 `str_replace_all()`', correct = TRUE),
+    answer('`str_split()`', correct = TRUE), 
+    answer('`str_extract()` 和 `str_extract_all()`', correct = TRUE),
+    answer('`str_match()` 和 `str_match_all()`', 
+           message = "`str_match()`（还有 `str_split_fixed()` 以及设定 `simplify = TRUE` 参数的 `str_split()` 和 `str_extract_all()`）返回的是字符矩阵，通常无法在 `mutate()` 中调用。"),
+    correct = "这么多选项的排列组合，你竟然还能选对啦！我也是真心服啦！&#x1F44D;",
+    try_again = "错误！这是一道多~~选题，分析要点在于 `mutate()` 需要的是能返回 **与输入向量等长输出结果** 的向量化函数。请查看关于 `stringr` 包 cheatsheet 的图示或相应 `str_*()` 函数的帮助文档，特别是返回值 `Value` 部分。",
+    post_message = "`str_match_all()` 函数以及在 `simplify = FALSE` 默认参数下的 `str_split()` 和 `str_extract_all()` 函数会返回和输入向量等长的列表，而列表也是一种特殊类型的向量，所以可用于 `mutate()` 函数——即生成列表列。",
+    allow_retry = TRUE, 
+    submit_button = "提交答案", 
+    try_again_button = "重新回答"
+  ),
+  
+  question("4 下面哪个 `forcats` 包中的函数是用来调整因子水平？", type = "multiple", 
+    answer('`fct_relevel()`', 
+           message = "`fct_relevel()` 可能是最容易让人混淆的函数，它是用来手动设置因子次序，而 **不是** 用来调整因子水平的！"),
+    answer('`fct_recode()`', correct = TRUE),
+    answer('`fct_reorder()`', 
+           message = "`fct_reorder()` 函数根据另一变量的取值来调整因子次序。"),
+    answer('`fct_rev()`', 
+           message = "`fct_rev()` 函数用来反转原来的因子次序。"),
+    answer('`fct_infreq()`', 
+           message = "`fct_infreq()` 函数根据因子出现的频率来调整因子次序。"),
+    correct = "这些处理因子变量实用函数的名字是有点让人迷乱，但你终于还是答对啦，赞！&#x1F44F;",
+    try_again = "错误。请查看讲义、`forcats` 包的 cheatsheet 或逐一查看各个 `fct_*()` 函数 R 内置的帮助文档，然后重试！",
+    post_message = "`fct_recode()` 的变体 `fct_collapse()` 函数也可用来（更便捷地）调整因子水平；此外，`fct_lump_prop()`、`fct_lump_n()`、`fct_lump_lowfreq()`、`fct_lump_min()`、`fct_other()` 等几个调整因子水平的函数你不想顺带了解一下吗？", 
+    allow_retry = TRUE,
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("5 日期-时间的处理从来都不是个简单的问题，相关 R 包往往都需要将时间存储为（相对某个基点时间算起的）数值。那么请问：`lubridate::as_date(\"2020-12-25\")` 和 `lubridate::as_datetime(\"2020-12-25\")` 在内部分别存储为：<br><span style='color: red'>（&#x1F4A3; 注意此题答错不允许 Try Again &#x1F4A3;）</span>",
+    answer("18621 和 16088544000"),
+    answer("18621 和 1608854400", correct = TRUE),
+    answer("186210 和 1608854400"),
+    answer("1608854400 和 186210"),
+    correct = random_praise_cn(),
+    incorrect = "错误。你可对生成的日期时间变量用 `unclass()` 或 `as.numeric()` 得到内部存储的数值。",
+    # allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  question("6 在时间相关的实证研究中我们往往需要完成以下任务：a. 创建日期-时间变量、b. 从日期-时间变量中提取 / 处理时间成分、c. 记录 / 处理时间跨度。请问，以下哪些代码能基于 `nycflights13::flights` 数据集的变量 `year`、`month` 和 `day` 生成正确的日期型变量 `ymd`？",
+    answer("`nycflights13::flights %>% mutate(ymd = make_date(year, month, day))`", 
+           correct = TRUE),
+    answer("`nycflights13::flights %>% mutate(ymd = parse_date(str_c(year, month, day, sep = \"-\"), format = \"%Y-%m-%d\"))`", correct = TRUE),
+    answer("`nycflights13::flights %>% mutate(ymd = as_date(str_c(year, month, day, sep = \".\")))`", correct = TRUE),
+    answer("`nycflights13::flights %>% mutate(ymd = ymd(str_c(year, month, day, sep = \"/\")))`", correct = TRUE),
+    answer("`nycflights13::flights %>% mutate(ymd = as.Date(str_c(year, month, day, sep = \"/\")))`", correct = TRUE),
+    correct = random_praise_cn(), 
+    try_again = "错误。在 R 控制台上一试便知！",
+    post_message = "条条大路通罗马！`make_date()`、`as_date()` 和 `ymd()` 来自 `lubridate` 包，`parse_date()` 来自 `readr` 包，`as.Date()` 来自 `base` 包。", 
+    allow_retry = TRUE, 
+    submit_button = "提交答案",
+    try_again_button = "重新回答"
+  ),
+  
+  caption = ""
+)
+
+```
+
+
+<br>
+
+### `r emo::ji("raising_hand_woman")` 提交选择题答案
+
+```{r ui, echo=FALSE}
+qfwr:::submission_ui(cid = "e136769587704d66a3827fa2a836120b")
+```
+
+```{r context = "server"}
+qfwr:::submission_server()
+```
+
+
+## `r emo::ji("woman_technologist")` 编程练习
+
+接下来你可退出 `learnr` 练习并在 `RStudio` 的 Console 中键入如下命令调出本讲练习的 `RMarkdown` 文档（`L09-lab.Rmd`），根据提示完成上机实操练习。
+
+```
+qfwr::qfwr_lab("L09")
+
+```
+
+记得将打开的未命名的 .Rmd 文档保存至合适的目录下，并取名为 L09-lab.Rmd。<span style='color: red'>**此文档无需上传至坚果云。**</span>
